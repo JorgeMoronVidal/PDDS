@@ -40,11 +40,12 @@ inline Eigen::Vector2d LUT_b(Eigen::Vector2d position,double t){
         ,gsl_spline2d_eval(spline_b_1, position(0), position(1), xacc_b_1, yacc_b_1));
 };
 inline Eigen::Matrix2d LUT_sigma(Eigen::Vector2d position,double t){
-        return Eigen::Matrix2d(
-        gsl_spline2d_eval(spline_sigma_00, position(0), position(1), xacc_sigma_00, yacc_sigma_00)
+         Eigen::Matrix2d m;
+         m << gsl_spline2d_eval(spline_sigma_00, position(0), position(1), xacc_sigma_00, yacc_sigma_00)
         ,gsl_spline2d_eval(spline_sigma_01, position(0), position(1), xacc_sigma_01, yacc_sigma_01)
         ,gsl_spline2d_eval(spline_sigma_10, position(0), position(1), xacc_sigma_10, yacc_sigma_10)
-        ,gsl_spline2d_eval(spline_sigma_11, position(0), position(1), xacc_sigma_11, yacc_sigma_11));
+        ,gsl_spline2d_eval(spline_sigma_11, position(0), position(1), xacc_sigma_11, yacc_sigma_11);
+        return m;
 };
 inline Eigen::Vector2d LUT_gradient(Eigen::Vector2d position,double t){
         return Eigen::Vector2d(

@@ -2,8 +2,8 @@
 #include "../BVPs/LUT.hpp"
 #include "../Integrators/FKACIntegrator.hpp"
 #include <omp.h>
-#include<vector>
-#include<iostream>
+#include <vector>
+#include <iostream>
 #ifndef EMFKACSOLVER
 #define EMFKACSOLVER
 enum sumindex
@@ -45,7 +45,6 @@ private:
     std::vector<Eigen::Vector2d> X_tau_lin, X_tau_sublin;
     std::vector<double> Y_tau_lin, Y_tau_sublin, Z_tau_lin, Z_tau_sublin,
     tau_lin, tau_sublin,xi_lin,xi_sublin;
-    std::vector<int> threads;
     std::vector<unsigned int> RNGcallsv;
     //RNG
     std::vector<boost::mt19937> RNG;
@@ -55,6 +54,7 @@ private:
     double sums[30];
     //Random number generator
 public:
+    std::vector<int> threads;
     //Time discretization of the trajectories and initial time of the trajectory T
     double h,sqrth,T;
     //Number of trayectories
@@ -113,6 +113,7 @@ public:
         Z_tau_sublin.resize(N);
         tau_sublin.resize(N);
         xi_sublin.resize(N);
+        RNGcallsv.resize(N);
         threads.resize(N);
         //Part of the algorithm that is going to happen inside a GPU
         #pragma omp parallel
@@ -198,6 +199,7 @@ public:
                 xi_sublin[n] = xi;
                 RNGcallsv[n] = RNGCalls_thread;
             }
+
         }
         //Ends part that is going to take place in a GPU
         #pragma omp parallel
@@ -205,11 +207,10 @@ public:
             score_linear_nvr_thread, score_sublinear_nvr_thread,
             score_linear_num_vr_thread,score_sublinear_num_vr_thread,
             score_linear_num_nvr_thread, score_sublinear_num_nvr_thread;
-            #pragma omp for
+            #pragma omp for ordered
             for(unsigned int n = 0; n< N; n++){
-                
                 score_linear_nvr_thread = Z_tau_lin[n] + Y_tau_lin[n]*BoundaryValueProblem.g(X_tau_lin[n],tau_lin[n]);
-                score_sublinear_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.g(X_tau_lin[n],tau_lin[n]);
+                score_sublinear_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.g(X_tau_sublin[n],tau_lin[n]);
                 score_linear_vr_thread = score_linear_nvr_thread + xi_lin[n];
                 score_sublinear_vr_thread = score_sublinear_nvr_thread + xi_sublin[n];
                 sums[ScoreLinear] += score_linear_nvr_thread;
@@ -229,11 +230,13 @@ public:
                 sums[RNGCalls] += RNGcallsv[n];
                 sums[tauLinear] += tau_lin[n];
                 sums[tauSublinear] += tau_sublin[n];
-
+                #pragma omp ordered
+                std::cout << BoundaryValueProblem.u(X0,0.0) << "\t" << Y_tau_sublin[n] << "\t" << score_linear_vr_thread << std::endl;
             }
         }
     }
     void Reset_sums(void){
+        #pragma omp parallel for
         for(int i = 0; i < 30; i++) sums[i] = 0.0;
     }
     void Update(void){
