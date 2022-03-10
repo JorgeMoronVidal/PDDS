@@ -68,6 +68,7 @@ public:
     APL,RNGC;
     //Initializer of the class
     EMFKACSolver(void){
+        N = 0;
         for(int i = 0; i < 30; i++) sums[i] = 0;
         #pragma omp parallel
         {
@@ -82,6 +83,7 @@ public:
         }
     }
     EMFKACSolver(unsigned int MPIrank){
+        N = 0;
         for(int i = 0; i < 30; i++) sums[i] = 0;
         #pragma omp parallel
         {
@@ -99,22 +101,22 @@ public:
                    double rho, bvp BoundaryValueProblem, double *boundary_parameters)
     {
         //for(int i = 0; i < 30; i++) sums[i] = 0;
-        N = N_tray;
+        N += N_tray;
         h = time_discretization;
         T = INFINITY;
         sqrth = sqrt(h);
-        X_tau_lin.resize(N);
-        Y_tau_lin.resize(N);
-        Z_tau_lin.resize(N);
-        tau_lin.resize(N);
-        xi_lin.resize(N);
-        X_tau_sublin.resize(N);
-        Y_tau_sublin.resize(N);
-        Z_tau_sublin.resize(N);
-        tau_sublin.resize(N);
-        xi_sublin.resize(N);
-        RNGcallsv.resize(N);
-        threads.resize(N);
+        X_tau_lin.resize(N_tray);
+        Y_tau_lin.resize(N_tray);
+        Z_tau_lin.resize(N_tray);
+        tau_lin.resize(N_tray);
+        xi_lin.resize(N_tray);
+        X_tau_sublin.resize(N_tray);
+        Y_tau_sublin.resize(N_tray);
+        Z_tau_sublin.resize(N_tray);
+        tau_sublin.resize(N_tray);
+        xi_sublin.resize(N_tray);
+        RNGcallsv.resize(N_tray);
+        threads.resize(N_tray);
         //Part of the algorithm that is going to happen inside a GPU
         #pragma omp parallel
         {
@@ -122,15 +124,18 @@ public:
             Eigen::Vector2d X,normal,normal_proyection,increment;
             double Y,Z,xi,t,ji_t,dist,dist_k;
             bool stoppingbc, Neumannbc;
-            unsigned int RNGCalls_thread;
+            unsigned int RNGCalls_thread = 0;
 
             #pragma omp for
-            for(unsigned int n = 0; n < N; n++){
+            for(unsigned int n = 0; n < N_tray; n++){
 
                 X = X0;
                 Y = 1;
                 Z = 0;
+                xi = 0;
+                ji_t = 0;
                 t = INFINITY;
+                RNGCalls_thread = 0;
                 dist = BoundaryValueProblem.distance(boundary_parameters,X,
                 normal_proyection,normal);
                 stoppingbc = BoundaryValueProblem.absorbing(normal_proyection);
@@ -172,8 +177,7 @@ public:
                 sqrth,normal_proyection, normal,boundary_parameters,
                 -0.5826,BoundaryValueProblem.distance,
                 BoundaryValueProblem.absorbing,BoundaryValueProblem.Neumann,
-                BoundaryValueProblem.sigma)!=outcome::stop);
-                //End of linear step
+                BoundaryValueProblem.sigma) != outcome::stop);
                 X_tau_lin[n] = normal_proyection;
                 Y_tau_lin[n] = Y;
                 Z_tau_lin[n] = Z;
@@ -200,17 +204,16 @@ public:
                 RNGcallsv[n] = RNGCalls_thread;
             }
 
-        }
-        //Ends part that is going to take place in a GPU
-        #pragma omp parallel
-        {   double score_linear_vr_thread,score_sublinear_vr_thread,
+            #pragma omp barrier
+            #pragma omp master
+            {
+            double score_linear_vr_thread,score_sublinear_vr_thread,
             score_linear_nvr_thread, score_sublinear_nvr_thread,
             score_linear_num_vr_thread,score_sublinear_num_vr_thread,
             score_linear_num_nvr_thread, score_sublinear_num_nvr_thread;
-            #pragma omp for ordered
-            for(unsigned int n = 0; n< N; n++){
+            for(unsigned int n = 0; n<N_tray; n++){
                 score_linear_nvr_thread = Z_tau_lin[n] + Y_tau_lin[n]*BoundaryValueProblem.g(X_tau_lin[n],tau_lin[n]);
-                score_sublinear_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.g(X_tau_sublin[n],tau_lin[n]);
+                score_sublinear_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.g(X_tau_sublin[n],tau_sublin[n]);
                 score_linear_vr_thread = score_linear_nvr_thread + xi_lin[n];
                 score_sublinear_vr_thread = score_sublinear_nvr_thread + xi_sublin[n];
                 sums[ScoreLinear] += score_linear_nvr_thread;
@@ -230,8 +233,7 @@ public:
                 sums[RNGCalls] += RNGcallsv[n];
                 sums[tauLinear] += tau_lin[n];
                 sums[tauSublinear] += tau_sublin[n];
-                #pragma omp ordered
-                std::cout << BoundaryValueProblem.u(X0,0.0) << "\t" << Y_tau_sublin[n] << "\t" << score_linear_vr_thread << std::endl;
+            }
             }
         }
     }
@@ -245,7 +247,7 @@ public:
         phi_sublinear = sums[ScoreSublinear]/N;
         phiphi_sublinear = sums[ScoreSublinear2]/N;
         phi_VR = sums[ScoreLinearVR]/N;
-        phiphi_VR = sums[ScoreLinearVR]/N;
+        phiphi_VR = sums[ScoreLinearVR2]/N;
         xi = sums[XiLinear]/N;
         xixi = sums[XiLinear2]/N;
         xi_sublinear = sums[XiSublinear]/N;
@@ -264,6 +266,19 @@ public:
         xixi_sublinear_num = sums[XiSublinearNum2]/N;
         RNGC = sums[RNGCalls];
         APL = sums[tauLinear]/N;
+    }
+    void Solve_OMP(Eigen::Vector2d X0, unsigned int eps, unsigned int N_tray, 
+                   double time_discretization, double rho, bvp BoundaryValueProblem,
+                   double *boundary_parameters){
+        Reset_sums();
+        N = 0;
+        do{
+            Solve_OMP(X0,N_tray,time_discretization,rho,BoundaryValueProblem,boundary_parameters);
+            Update();
+            //std::cout << sqrt((phiphi_VR-phi_VR*phi_VR)/N) << "\t" << eps*fabs(BoundaryValueProblem.u(X0,INFINITY)-phi_VR) << std::endl;
+        }while(2*sqrt((phiphi_VR-phi_VR*phi_VR)/N)>eps*fabs(BoundaryValueProblem.u(X0,INFINITY)-phi_VR));
+        printf("%e %e %e %e\n",time_discretization,phiphi_VR-phi_VR*phi_VR,2*sqrt((phiphi_VR-phi_VR*phi_VR)/N),
+        BoundaryValueProblem.u(X0,INFINITY)-phi_VR);
     }
 };
 #endif
