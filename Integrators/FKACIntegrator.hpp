@@ -45,8 +45,8 @@ Eigen::Vector2d & increment, pfmatrix sigma, pfscalar f, pfvector b, pfscalar c,
 pfscalarN psi, pfscalarN varphi,  pfvector gradient){
   Eigen::Matrix2d sigma_aux = sigma(X,t);
   Increment_Update(increment, rng, normalrng, sqrth);
-  Z += f(X,t)*Y*h + psi(X,N,t)*Y*ji_t;
   xi +=  Y *(-sigma_aux.transpose()*gradient(X,t)).dot(increment);
+  Z += f(X,t)*Y*h + psi(X,N,t)*Y*ji_t;
   Y += c(X,t)*Y*h + varphi(X,N,t) * Y * ji_t;
   X += b(X,t)*h + sigma_aux*increment;
   t -= h;
@@ -156,7 +156,6 @@ Eigen::Vector2d & Npro, Eigen::Vector2d & N, double *params, double Gobet_Consta
 
       case stop:
         ji_t = 0.0;
-        X = Npro;
         break;
 
       case reflect:

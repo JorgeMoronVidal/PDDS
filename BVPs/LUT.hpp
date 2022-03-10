@@ -7,6 +7,8 @@
 #include <gsl/gsl_errno.h>
 #include <string>
 #include <fstream>
+#ifndef LUT
+#define LUT
 /*Variables and functions that manage with LUT in BVPs*/
 /*LUT auxiliary global variables. This part only works with 2D problems*/
 gsl_spline2d *spline_u,*spline_g,*spline_p,*spline_f,*spline_c,*spline_sigma_00,*spline_sigma_01,
@@ -147,3 +149,4 @@ gsl_interp_accel *yaccel){
     infile.close();
     Init_LUT(len[0],len[1],x[1],x[2],z,spline,xaccel,yaccel);
 }
+#endif

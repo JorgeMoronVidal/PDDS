@@ -1,0 +1,2 @@
+nNodes is 108
+Processor 0 ended sending its contribution to G and B

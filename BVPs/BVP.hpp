@@ -1,8 +1,11 @@
 #include <iostream>
+#include <stdio.h>
 #include <eigen3/Eigen/Core>
 #include <vector>
+#include <math.h>
 #ifndef BVP
 #define BVP
+//#include "LUT.hpp"
 typedef double (*pfscalar)(Eigen::Vector2d, double );
 typedef double (*pfscalarti)(Eigen::Vector2d);
 typedef double (*pfscalarN)(Eigen::Vector2d, Eigen::Vector2d, double);
@@ -10,6 +13,7 @@ typedef Eigen::Vector2d (*pfvector)(Eigen::Vector2d, double);
 typedef Eigen::Matrix2d (*pfmatrix)(Eigen::Vector2d, double);
 typedef double (*pfdist)(double *,Eigen::Vector2d, Eigen::Vector2d &, Eigen::Vector2d &);
 typedef bool (*pfbtype)(Eigen::Vector2d);
+typedef double (*pfRBF)(Eigen::Vector2d, Eigen::Vector2d, double);
 //Default scalar function which always returns  0.0
 inline double Default_Scalar(Eigen::Vector2d position,double t){
         return 0.0;
@@ -39,6 +43,10 @@ inline double Default_Distance(double  *parameters,Eigen::Vector2d position, Eig
 //Default boundary type function which always returns true
 inline bool Default_Btype(Eigen::Vector2d position){
         return true;
+}
+//Default Radial Basis Function inverse multiquadric
+inline double Default_RBF(Eigen::Vector2d X, Eigen::Vector2d X_j, double c){
+        return 1.0/sqrt(pow((X-X_j).norm(),2) + c);
 }
 /*This structure stores the functions that define a given BVP.*/
 struct bvp{
@@ -74,5 +82,7 @@ struct bvp{
         pfbtype absorbing = Default_Btype;
         //Neumann(Eigen::Vector2d Bposition) True if BC's Neumann in Bposition.   
         pfbtype Neumann = Default_Btype;
+        //RBF for interpolation   
+        pfRBF RBF = Default_RBF;
 };
 #endif
