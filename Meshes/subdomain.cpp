@@ -86,7 +86,7 @@ void Subdomain::Solve(MPI_Comm & world){
     std::vector<direction> directions{North, South, East, West};
     char summon_Octave[256];
     //sprintf(summon_Octave,"octave-cli Poisson_eq_3.m %d %d %d",myid,label[0],label[1]);
-    sprintf(summon_Octave,"octave-cli Poisson_Monegros.m %d %d %d",myid,label[0],label[1]);
+    sprintf(summon_Octave,"octave-cli Solvers/Monegros_2.m %d %d %d",myid,label[0],label[1]);
     for(std::vector<direction>::iterator direction_iterator = directions.begin();
     direction_iterator != directions.end();
     direction_iterator ++){

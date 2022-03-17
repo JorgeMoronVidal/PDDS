@@ -128,11 +128,7 @@ public:
 
             #pragma omp for
             for(unsigned int n = 0; n < N_tray; n++){
-<<<<<<< HEAD
                 //std::cout << n  << " " << id << std::endl;
-=======
-
->>>>>>> df00294c016ceca86ad23b32e2f1331bd14b5db6
                 X = X0;
                 Y = 1;
                 Z = 0;
@@ -207,7 +203,6 @@ public:
                 xi_sublin[n] = xi;
                 RNGcallsv[n] = RNGCalls_thread;
             }
-<<<<<<< HEAD
             #pragma omp barrier
         }
     }
@@ -241,39 +236,6 @@ public:
                     sums[RNGCalls] += RNGcallsv[n];
                     sums[tauLinear] += tau_lin[n];
                     sums[tauSublinear] += tau_sublin[n];
-=======
-
-            #pragma omp barrier
-            #pragma omp master
-            {
-            double score_linear_vr_thread,score_sublinear_vr_thread,
-            score_linear_nvr_thread, score_sublinear_nvr_thread,
-            score_linear_num_vr_thread,score_sublinear_num_vr_thread,
-            score_linear_num_nvr_thread, score_sublinear_num_nvr_thread;
-            for(unsigned int n = 0; n<N_tray; n++){
-                score_linear_nvr_thread = Z_tau_lin[n] + Y_tau_lin[n]*BoundaryValueProblem.g(X_tau_lin[n],tau_lin[n]);
-                score_sublinear_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.g(X_tau_sublin[n],tau_sublin[n]);
-                score_linear_vr_thread = score_linear_nvr_thread + xi_lin[n];
-                score_sublinear_vr_thread = score_sublinear_nvr_thread + xi_sublin[n];
-                sums[ScoreLinear] += score_linear_nvr_thread;
-                sums[ScoreSublinear] += score_sublinear_nvr_thread;
-                sums[ScoreLinear2] += score_linear_nvr_thread* score_linear_nvr_thread;
-                sums[ScoreSublinear2] += score_sublinear_nvr_thread*score_sublinear_nvr_thread;
-                sums[XiLinear] += xi_lin[n];
-                sums[XiSublinear] += xi_sublin[n];
-                sums[XiLinear2] += xi_lin[n]*xi_lin[n];
-                sums[XiSublinear2] += xi_sublin[n]*xi_sublin[n];
-                sums[ScoreLinearVR] += score_linear_nvr_thread + xi_lin[n];
-                sums[ScoreSublinearVR] += score_sublinear_nvr_thread + xi_sublin[n];
-                sums[ScoreLinearVR2] += pow(score_linear_nvr_thread + xi_lin[n],2);
-                sums[ScoreSublinearVR2] += pow(score_sublinear_nvr_thread + xi_sublin[n],2);
-                sums[XiScoreLinear] += xi_lin[n]*(score_linear_nvr_thread);
-                sums[XiScoreSublinear] += xi_sublin[n]*(score_sublinear_nvr_thread);
-                sums[RNGCalls] += RNGcallsv[n];
-                sums[tauLinear] += tau_lin[n];
-                sums[tauSublinear] += tau_sublin[n];
-            }
->>>>>>> df00294c016ceca86ad23b32e2f1331bd14b5db6
             }
         }
     }
@@ -364,7 +326,6 @@ public:
         RNGC = sums[RNGCalls];
         APL = sums[tauLinear]/N;
     }
-<<<<<<< HEAD
     void Solve_OMP_Analytic(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
                    double rho, bvp BoundaryValueProblem, double *boundary_parameters){
         Simulate_OMP(X0,N_tray,time_discretization,rho,BoundaryValueProblem,boundary_parameters);
@@ -391,20 +352,12 @@ public:
                 
     }
     void Test_Solve_OMP_Analytic(Eigen::Vector2d X0, unsigned int eps, unsigned int N_tray, 
-=======
-    void Solve_OMP(Eigen::Vector2d X0, unsigned int eps, unsigned int N_tray, 
->>>>>>> df00294c016ceca86ad23b32e2f1331bd14b5db6
                    double time_discretization, double rho, bvp BoundaryValueProblem,
                    double *boundary_parameters){
         Reset_sums();
         N = 0;
         do{
-<<<<<<< HEAD
             Solve_OMP_Analytic(X0,N_tray,time_discretization,rho,BoundaryValueProblem,boundary_parameters);
-=======
-            Solve_OMP(X0,N_tray,time_discretization,rho,BoundaryValueProblem,boundary_parameters);
-            Update();
->>>>>>> df00294c016ceca86ad23b32e2f1331bd14b5db6
             //std::cout << sqrt((phiphi_VR-phi_VR*phi_VR)/N) << "\t" << eps*fabs(BoundaryValueProblem.u(X0,INFINITY)-phi_VR) << std::endl;
         }while(2*sqrt((phiphi_VR-phi_VR*phi_VR)/N)>eps*fabs(BoundaryValueProblem.u(X0,INFINITY)-phi_VR));
         printf("%e %e %e %e\n",time_discretization,phiphi_VR-phi_VR*phi_VR,2*sqrt((phiphi_VR-phi_VR*phi_VR)/N),

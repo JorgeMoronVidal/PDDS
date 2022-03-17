@@ -1,8 +1,8 @@
 task,total_tike,task_time,N_process
-Reading configuration File,5.138417e-04,5.130325e-04,4
-Fullfilling interfaces,1.871621e-03,1.357779e-03,1
+Reading configuration File,5.368986e-04,5.360171e-04,4
+Fullfilling interfaces,1.920224e-03,1.383325e-03,1
 ************WARMING UP***********
-MC Simulations,2.517272e+01,2.517085e+01,4
-Receiving G and B,3.327350e+01,8.100783e+00,4
-Fullfilling subdomains,3.330058e+01,2.707931e-02,1
-Solving subdomains,3.400427e+01,7.036914e-01,4
+MC Simulations,3.274476e+01,3.274284e+01,4
+Receiving G and B,4.109645e+01,8.351690e+00,4
+Fullfilling subdomains,4.112053e+01,2.408140e-02,1
+Solving subdomains,4.167321e+01,5.526830e-01,4
