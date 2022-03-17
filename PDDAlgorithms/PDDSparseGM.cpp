@@ -2343,7 +2343,7 @@ void PDDSparseGM::Compute_Solution(bvp BoundValProb){
     }
     fclose(ofile);
     Update_TimeFile("Building up G and var_G GM",1);
-    /*C_sparse.resize(nNodes,nNodes);
+    C_sparse.resize(nNodes,nNodes);
     C_sparse += G_sparse.cwiseAbs();
     eps = std::max((C_sparse*Eigen::Vector2d::Ones(nNodes)).maxCoeff()-2,0.0);
     std::cout << "Eps is equal to " << eps << std::endl;
