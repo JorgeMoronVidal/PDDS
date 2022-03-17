@@ -255,6 +255,8 @@ public:
                 stencil_knot.stencil_parameters[2],stencil_knot.stencil_parameters[3]},
                 boundary_parameters[4] = {stencil_knot.global_parameters[0],stencil_knot.global_parameters[1],
                 stencil_knot.global_parameters[2],stencil_knot.global_parameters[3]};
+                std::cout << boundary_parameters[0] << " " << boundary_parameters[1] << " " <<
+                boundary_parameters[2] << " " << boundary_parameters[3] << "\n";
                 Eigen::Vector2d aux_np, aux_n;
                 stencil_knot.Reset();
                 for(unsigned int n = 0; n<N_tray; n++){
