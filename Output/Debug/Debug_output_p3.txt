@@ -1,12 +1,2 @@
-**********PDDSparse Solver*************
-***************Ver 1.0******************
-***********Jorge Moron Vidal************
-**********jmoron@math.uc3m.es***********
-h0 = 8.000000e-02 	 T_start = inf
-Number of trayectories per knot 500
-Number of trayectories per job 0
-Number of subdomains/interfaces: 3 x 3 
-Number of knots per interface: 10
-Total number of knots: 108
-Position of South-West corner of the domain: (-15.00,-15.00)
-Position of North-East corner of the domain: (15.00,15.00)
+nNodes is 213
+Processor 0 ended sending its contribution to G and B

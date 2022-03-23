@@ -1,19 +1,32 @@
-#include "BVPs/EDPs/Monegros_2.hpp"
+#include "BVPs/EDPs/Semilinear_u3.hpp"
 #include "BVPs/Domains/rectangle.hpp"
 #include "PDDAlgorithms/PDDSparseGM.hpp"
 int main(int argc, char *argv[]){
     //BoundaryValueProblem Definition
     bvp boundvalprob;
-    boundvalprob.u = Equation_u;
-    boundvalprob.g = Equation_g;
-    boundvalprob.f = Equation_f;
-    boundvalprob.c = Equation_c;
-    boundvalprob.sigma = Equation_sigma;
-    boundvalprob.gradient = Equation_grad;
+    boundvalprob.u = EquationSM_u;
+    boundvalprob.g = EquationSM_g;
+    boundvalprob.f = EquationSM_f;
+    //boundvalprob.gradient = Equation_grad;
+    boundvalprob.sigma = EquationSM_sigma;
+    //boundvalprob.gradient = Equation_grad;
     boundvalprob.distance = Rectangle2D;
     boundvalprob.absorbing = Stopping;
+    bvp nonlinboundprob;
+    nonlinboundprob.u = EquationSM_u;
+    nonlinboundprob.g = EquationSM_g;
+    nonlinboundprob.f = EquationSM_Residual;
+    nonlinboundprob.c = EquationSM_c;
+    nonlinboundprob.sigma = EquationSM_sigma;
+    //boundvalprob.gradient = Equation_grad;
     std::string config("configuration.txt");
     PDDSparseGM PDDS(argc,argv,config);
+    //First iteration
     PDDS.Solve(boundvalprob);
     PDDS.Solve_Subdomains(boundvalprob);
+    //Following iterations
+    for(int i = 1; i < 5; i++){
+        PDDS.Solve_SemiLin(i,boundvalprob, spline_u, xacc_u,yacc_u);
+        PDDS.Solve_Subdomains_SemiLin(i,boundvalprob,spline_u, xacc_u,yacc_u);
+    }
 }

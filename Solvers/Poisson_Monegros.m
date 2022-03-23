@@ -108,7 +108,7 @@ b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
 L(b,:) = zeros(4*N,(N+1)^2); 
 L(b,b) = eye(4*N);
-rhs = Monegros(xx,yy,'d2udx2') +Monegros(xx,yy,'d2udy2');
+rhs = Monegros(xx,yy,'d2udx2') +Monegros(xx,yy,'d2udy2') - (Monegros(xx,yy,'u')).^3;
 %rhs(b) = sin(omegax*pi*xx(b) + omegay*pi*yy(b)) + cos(omegapx*pi*xx(b) + omegapy*pi*yy(b));
 b_west = find(xx==x_west(1));
 rhs(b_west) = interp1(y_west,sol_west, yy(b_west),'spline');

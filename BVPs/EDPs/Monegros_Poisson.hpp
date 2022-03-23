@@ -57,6 +57,9 @@ inline Eigen::Matrix2d Equation_sigma(Eigen::Vector2d X, double t){
 inline double Equation_f(Eigen::Vector2d X, double t){
     return -Equation_d2udx2(X)-Equation_d2udy2(X);
 }
+inline double Equation_f_NL(Eigen::Vector2d X, double t){
+    return -Equation_d2udx2(X)-Equation_d2udy2(X)+pow(Equation_u(X,t),3);
+}
 inline double Equation_Varphi(Eigen::Vector2d X,Eigen::Vector2d normal, double t){
     return 0.0;
 }

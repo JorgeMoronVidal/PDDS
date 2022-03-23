@@ -78,6 +78,10 @@
 #include <string.h>
 #include <fstream>
 #include <forward_list>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_interp2d.h>
+#include <gsl/gsl_spline2d.h>
+#include <gsl/gsl_errno.h>
 //enum direction {North, South, East, West};
 typedef Eigen::Triplet<double,int> T;
 class PDDSJob {
@@ -178,6 +182,9 @@ class PDDSparseGM{
        void Send_Stencil_Data_Loop(int index);
        /*Receives the stencil data from the server*/
        Stencil Recieve_Stencil_Data(void);
+       void Set_LUT_FILE(int index, gsl_spline2d *spline_u, gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u);
+       void Init_LUT(unsigned int Nx, unsigned int Ny, double *x, double *y, double *value, 
+       gsl_spline2d *spline, gsl_interp_accel *xaccel, gsl_interp_accel *yaccel);
        Stencil Recieve_Stencil_Data_Loop(void);
        Stencil Compute_Stencil(int index);
        /*Send G matrix and B Matrix*/
@@ -231,7 +238,7 @@ class PDDSparseGM{
        void Solve(bvp BoundValProb, std::string file);
        /*Solves the problem given by the configuration file*/
        void Solve(bvp BoundValProb); 
-       /*Prints the problem parameters on screen*/
+        /*Prints the problem parameters on screen*/
        void Print_Problem(void); 
        /*Prints the content of the Interface vector on screen*/
        void Print_Interface(void);
@@ -239,6 +246,10 @@ class PDDSparseGM{
        void Read_Solution(void);
        /*Solves subdomains*/
        void Solve_Subdomains(bvp BoundValProb);
+       /*Solves a non-linear problem*/
+       void Solve_SemiLin(int iteration, bvp Lin_BVP,gsl_spline2d *spline_u, gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u); 
+       /*Solves Subdomains of a Semilinear problem*/
+       void Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb, gsl_spline2d *spline_u, gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u);
        /*Intermediate Step*/
        //void Intermediate_Step(bvp BoundValProb, std::vector<double> h_vec, std::vector<int> N_vec);
        /*Computes the optimal h and N given a bias and variance estimation*/

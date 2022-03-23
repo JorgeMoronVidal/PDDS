@@ -1,0 +1,23 @@
+task,total_tike,task_time,N_process
+Reading configuration File,4.056537e-04,4.048153e-04,4
+Fullfilling interfaces,9.685061e-04,5.628524e-04,1
+************WARMING UP***********
+MC Simulations,3.516716e+01,3.516620e+01,4
+Receiving G and B,7.426115e+01,3.909399e+01,4
+Fullfilling subdomains,7.426589e+01,4.736798e-03,1
+Solving subdomains,7.460558e+01,3.396894e-01,4
+************WARMING UP***********
+MC Simulations,1.156141e+02,4.100854e+01,4
+Receiving G and B,1.516032e+02,3.598913e+01,4
+Fullfilling subdomains,1.516078e+02,4.551397e-03,1
+Solving subdomains,1.520358e+02,4.280136e-01,4
+************WARMING UP***********
+MC Simulations,1.931041e+02,4.106829e+01,4
+Receiving G and B,2.289164e+02,3.581230e+01,4
+Fullfilling subdomains,2.289207e+02,4.297129e-03,1
+Solving subdomains,2.292774e+02,3.566944e-01,4
+************WARMING UP***********
+MC Simulations,2.701500e+02,4.087257e+01,4
+Receiving G and B,3.056828e+02,3.553287e+01,4
+Fullfilling subdomains,3.056878e+02,4.943284e-03,1
+Solving subdomains,3.060353e+02,3.474859e-01,4
