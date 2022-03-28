@@ -20,18 +20,18 @@
    % diagnoal entries 
    Dy = Dy - diag(sum(Dy.')) ;
  end
- function uu_dx2 = Estimate_dx2(h,xx,yy,uu_LUT,xx_LUT,yy_LUT)
-  uu_l = interp2(xx_LUT,yy_LUT,uu_LUT,xx - h,yy,'cubic');
-  uu_r = interp2(xx_LUT,yy_LUT,uu_LUT,xx + h,yy,'cubic');
-  uu_c = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'cubic');
-  uu_dx2 = (uu_l+uu_r-2*uu_c)./(h.*h);
-endfunction
-function uu_dy2 = Estimate_dy2(h,xx,yy,uu_LUT,xx_LUT,yy_LUT)
-  uu_l = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy-h,'cubic');
-  uu_r = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy+h,'cubic');
-  uu_c = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'cubic');
-  uu_dy2 = (uu_l+uu_r-2*uu_c)./(h.*h);
-endfunction
+%function uu_dx2 = Estimate_dx2(h,xx,yy,uu_LUT,xx_LUT,yy_LUT)
+%  uu_l = interp2(xx_LUT,yy_LUT,uu_LUT,xx - h,yy,'spline');
+%  uu_r = interp2(xx_LUT,yy_LUT,uu_LUT,xx + h,yy,'spline');
+%  uu_c = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline');
+%  uu_dx2 = (uu_l+uu_r-2*uu_c)./(h.*h);
+%endfunction
+%function uu_dy2 = Estimate_dy2(h,xx,yy,uu_LUT,xx_LUT,yy_LUT)
+%  uu_l = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy-h,'spline');
+%  uu_r = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy+h,'spline');
+%  uu_c = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline');
+%  uu_dy2 = (uu_l+uu_r-2*uu_c)./(h.*h);
+%endfunction
 %p36.m (Modified by Jorge Moron) - Poisson eq. on [-1,1]x[-1,1] with nonzero BC's
 %Set up grid and 2D Laplacian, boundary points included:
 args = argv();
@@ -73,20 +73,23 @@ y_LUT = table(:,1);
 file = sprintf("Output/Subdomains/Sol_%s_%s.txt", args{2},args{3});
 table = csvread(file);
 u_LUT = table(:,1);
+file = sprintf("Output/Subdomains/Correction_%s_%s.txt", args{2},args{3});
+table = csvread(file);
+v_LUT = table(:,1);
 [xx_LUT,yy_LUT]=meshgrid(x_LUT,y_LUT);
 uu_LUT = reshape(u_LUT,size(yy_LUT));
-uu_LUT = uu_LUT';
+vv_LUT = reshape(v_LUT,size(yy_LUT));
 N = size(x_north)(1); [Dx,Dy,x,y] = cheb(N,x_north,y_west);
-[xx,yy] = meshgrid(x,y); xx = xx(:); yy = yy(:);
+[xx,yy] = meshgrid(x,y);
+rhs = (interp2(xx_LUT,yy_LUT,vv_LUT,xx,yy,'spline').^2).*(3*(interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline'))-2*interp2(xx_LUT,yy_LUT,vv_LUT,xx,yy,'spline'));
+rhs = rhs(:);
+xx = xx(:); yy = yy(:);
 D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I)-3*diag((interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'cubic')).^2);
 %Impose boundary conditions and -f function by replacing appropriate rows of L:
 b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
 L(b,:) = zeros(4*N,(N+1)^2); 
 L(b,b) = eye(4*N);
-d2udx2_LUT=Estimate_dx2(0.005*ones(size(xx)),xx,yy,uu_LUT,xx_LUT,yy_LUT);
-d2udy2_LUT=Estimate_dy2(0.005*ones(size(yy)),xx,yy,uu_LUT,xx_LUT,yy_LUT);
-rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) - (sin(pi*xx).*sin(pi*yy)).^3 - d2udx2_LUT -d2udy2_LUT + uu_LUT(:).^3;
 %rhs(b) = sin(omegax*pi*xx(b) + omegay*pi*yy(b)) + cos(omegapx*pi*xx(b) + omegapy*pi*yy(b));
 b_west = find(xx==x_west(1));
 rhs(b_west) = interp1(y_west,sol_west, yy(b_west),'spline');
@@ -106,7 +109,7 @@ file = sprintf("Output/Subdomains/Correction_%s_%s.txt", args{2},args{3});
 v = (vv')(:);
 save("-ascii",file,"v");
 file = sprintf("Output/Subdomains/Sol_%s_%s.txt", args{2},args{3});
-u = (vv'+uu_LUT)(:);
+u = (vv'+uu_LUT')(:);
 save("-ascii",file,"u");
 %rhs(b_west) = interp1(y_west,sol_noisy_west, yy(b_west),'spline');
 %rhs(b_east) = interp1(y_east,sol_noisy_east, yy(b_east),'spline');
@@ -117,6 +120,7 @@ save("-ascii",file,"u");
 %u = (uu')(:);
 %save("-ascii",file,"u");
 %[xx,yy] = meshgrid(x,y);
+%uu = reshape(u,size(xx));
 %[xxx,yyy] = meshgrid(-1:.04:1,-1:.04:1);
 %uuu = interp2(xx,yy,uu,xxx,yyy,'spline');
 %clf, subplot(1,3,1),

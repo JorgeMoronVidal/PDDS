@@ -206,6 +206,118 @@ public:
             #pragma omp barrier
         }
     }
+    void Simulate_OMP(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
+                   double rho, bvp BoundaryValueProblem, double *boundary_parameters, gsl_spline2d *LUT_u,
+                   gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u, gsl_spline2d *LUT_v,
+                   gsl_interp_accel *xacc_v, gsl_interp_accel *yacc_v)
+    {
+        //for(int i = 0; i < 30; i++) sums[i] = 0;
+        N += N_tray;
+        h = time_discretization;
+        T = INFINITY;
+        sqrth = sqrt(h);
+        X_tau_lin.resize(N_tray);
+        Y_tau_lin.resize(N_tray);
+        Z_tau_lin.resize(N_tray);
+        tau_lin.resize(N_tray);
+        xi_lin.resize(N_tray);
+        X_tau_sublin.resize(N_tray);
+        Y_tau_sublin.resize(N_tray);
+        Z_tau_sublin.resize(N_tray);
+        tau_sublin.resize(N_tray);
+        xi_sublin.resize(N_tray);
+        RNGcallsv.resize(N_tray);
+        threads.resize(N_tray);
+        //Part of the algorithm that is going to happen inside a GPU
+        #pragma omp parallel
+        {
+            int id = omp_get_thread_num();
+            Eigen::Vector2d X,normal,normal_proyection,increment;
+            double Y,Z,xi,t,ji_t,dist,dist_k;
+            bool stoppingbc, Neumannbc;
+            unsigned int RNGCalls_thread = 0;
+
+            #pragma omp for
+            for(unsigned int n = 0; n < N_tray; n++){
+                //std::cout << n  << " " << id << std::endl;
+                X = X0;
+                Y = 1;
+                Z = 0;
+                xi = 0;
+                ji_t = 0;
+                t = INFINITY;
+                RNGCalls_thread = 0;
+                dist = BoundaryValueProblem.distance(boundary_parameters,X,
+                normal_proyection,normal);
+                stoppingbc = BoundaryValueProblem.absorbing(normal_proyection);
+                Neumannbc = BoundaryValueProblem.Neumann(normal_proyection);
+                threads[n] = id;
+
+                do{
+                    if(stoppingbc == true){
+
+                        Step(X,normal,Y,Z,xi,t,ji_t,h,sqrth,RNG[id],normal_dist[id],
+                        increment,BoundaryValueProblem.sigma,BoundaryValueProblem.num_f,
+                        BoundaryValueProblem.b,BoundaryValueProblem.num_c,BoundaryValueProblem.psi,
+                        BoundaryValueProblem.varphi, BoundaryValueProblem.gradient,LUT_u,xacc_u,yacc_u,
+                        LUT_v,xacc_v,yacc_v);
+                        RNGCalls_thread += 2;
+                    }else{
+                        if(Neumannbc == true){
+
+                            Step(X,normal,normal_proyection,Y,Z,xi,t,ji_t,rho,h,increment,
+                            BoundaryValueProblem.sigma,BoundaryValueProblem.f,
+                            BoundaryValueProblem.b,BoundaryValueProblem.c,
+                            BoundaryValueProblem.psi,BoundaryValueProblem.varphi,
+                            BoundaryValueProblem.gradient, BoundaryValueProblem.distance,
+                            boundary_parameters,dist_k,RNG[id],normal_dist[id],exp_dist[id],
+                            sqrth,RNGCalls_thread);
+                             
+                        }else{
+
+                            Step(X,normal,Y,Z,xi,t,ji_t,h,sqrth,RNG[id],normal_dist[id],
+                            increment,BoundaryValueProblem.sigma,BoundaryValueProblem.f,
+                            BoundaryValueProblem.b,BoundaryValueProblem.c,BoundaryValueProblem.psi,
+                            BoundaryValueProblem.varphi, BoundaryValueProblem.gradient);
+                            RNGCalls_thread += 2;
+                        }
+                    }
+                    dist_k = dist;
+                    stoppingbc = BoundaryValueProblem.absorbing(normal_proyection);
+                    Neumannbc = BoundaryValueProblem.Neumann(normal_proyection);
+                }while(Inside(dist,stoppingbc,Neumannbc,X,t,ji_t,T,
+                sqrth,normal_proyection, normal,boundary_parameters,
+                -0.5826,BoundaryValueProblem.distance,
+                BoundaryValueProblem.absorbing,BoundaryValueProblem.Neumann,
+                BoundaryValueProblem.sigma) != outcome::stop);
+                X_tau_lin[n] = normal_proyection;
+                Y_tau_lin[n] = Y;
+                Z_tau_lin[n] = Z;
+                tau_lin[n] = t;
+                xi_lin[n] = xi;
+                do{
+                        Step(X,normal,Y,Z,xi,t,ji_t,h,sqrth,RNG[id],normal_dist[id],
+                        increment,BoundaryValueProblem.sigma,BoundaryValueProblem.f,
+                        BoundaryValueProblem.b,BoundaryValueProblem.c,BoundaryValueProblem.psi,
+                        BoundaryValueProblem.varphi, BoundaryValueProblem.gradient);
+                        RNGCalls_thread += 2;
+
+                }while(Inside(dist,stoppingbc,Neumannbc,X,t,ji_t,T,
+                sqrth,normal_proyection, normal,boundary_parameters,
+                0.0,BoundaryValueProblem.distance,
+                BoundaryValueProblem.absorbing,BoundaryValueProblem.Neumann,
+                BoundaryValueProblem.sigma)!=outcome::stop);
+                //End of sublinear step
+                X_tau_sublin[n] = normal_proyection;
+                Y_tau_sublin[n] = Y;
+                Z_tau_sublin[n] = Z;
+                tau_sublin[n] = t;
+                xi_sublin[n] = xi;
+                RNGcallsv[n] = RNGCalls_thread;
+            }
+            #pragma omp barrier
+        }
+    }
     void Reduce_Analytic(bvp BoundaryValueProblem, unsigned int N_tray){
         #pragma omp parallel
             #pragma omp master
@@ -255,8 +367,8 @@ public:
                 stencil_knot.stencil_parameters[2],stencil_knot.stencil_parameters[3]},
                 boundary_parameters[4] = {stencil_knot.global_parameters[0],stencil_knot.global_parameters[1],
                 stencil_knot.global_parameters[2],stencil_knot.global_parameters[3]};
-                std::cout << boundary_parameters[0] << " " << boundary_parameters[1] << " " <<
-                boundary_parameters[2] << " " << boundary_parameters[3] << "\n";
+                //std::cout << boundary_parameters[0] << " " << boundary_parameters[1] << " " <<
+                //boundary_parameters[2] << " " << boundary_parameters[3] << "\n";
                 Eigen::Vector2d aux_np, aux_n;
                 stencil_knot.Reset();
                 for(unsigned int n = 0; n<N_tray; n++){
@@ -345,6 +457,27 @@ public:
         Eigen::Vector2d aux1,aux2;
         if(fabs(BoundaryValueProblem.distance(boundary_parameters,X0,aux1,aux2))>1E-08){
             Simulate_OMP(X0,N_tray,time_discretization,rho,BoundaryValueProblem,stencil_parameters);
+            Reduce_Analytic(BoundaryValueProblem, N_tray, stencil_knot,c2,G,G_var,G_j,B, BB);
+            Update(); 
+        }else{
+            B = BoundaryValueProblem.g(X0,0.0);
+            BB = B*B;
+        }
+                
+    }
+    void Solve_OMP_Semilinear(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
+                   double rho, bvp BoundaryValueProblem, Stencil & stencil_knot, double c2, 
+                   std::vector<double>& G, std::vector<double>& G_var, std::vector<int> &G_j,
+                   double & B, double & BB, gsl_spline2d *LUT_u, gsl_interp_accel *xacc_u,
+                   gsl_interp_accel *yacc_u, gsl_spline2d *LUT_v, gsl_interp_accel *xacc_v, gsl_interp_accel *yacc_v){
+        double stencil_parameters[4] = {stencil_knot.stencil_parameters[0],stencil_knot.stencil_parameters[1],
+               stencil_knot.stencil_parameters[2],stencil_knot.stencil_parameters[3]},
+               boundary_parameters[4] = {stencil_knot.global_parameters[0],stencil_knot.global_parameters[1],
+               stencil_knot.global_parameters[2],stencil_knot.global_parameters[3]};
+        Eigen::Vector2d aux1,aux2;
+        if(fabs(BoundaryValueProblem.distance(boundary_parameters,X0,aux1,aux2))>1E-08){
+            Simulate_OMP(X0,N_tray,time_discretization,rho,BoundaryValueProblem,stencil_parameters
+                        ,LUT_u, xacc_u, yacc_u, LUT_v, xacc_v, yacc_v);
             Reduce_Analytic(BoundaryValueProblem, N_tray, stencil_knot,c2,G,G_var,G_j,B, BB);
             Update(); 
         }else{

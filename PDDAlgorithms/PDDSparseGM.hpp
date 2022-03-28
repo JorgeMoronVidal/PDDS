@@ -182,7 +182,8 @@ class PDDSparseGM{
        void Send_Stencil_Data_Loop(int index);
        /*Receives the stencil data from the server*/
        Stencil Recieve_Stencil_Data(void);
-       void Set_LUT_FILE(int index, gsl_spline2d *spline_u, gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u);
+       void Set_LUT_FILE_Solution(int index, std::vector<double> & aux_x,std::vector<double> & aux_y,std::vector<double> & aux_sol);
+       void Set_LUT_FILE_Correction(int index, std::vector<double> & aux_x,std::vector<double> & aux_y,std::vector<double> & aux_sol);
        void Init_LUT(unsigned int Nx, unsigned int Ny, double *x, double *y, double *value, 
        gsl_spline2d *spline, gsl_interp_accel *xaccel, gsl_interp_accel *yaccel);
        Stencil Recieve_Stencil_Data_Loop(void);
@@ -247,9 +248,9 @@ class PDDSparseGM{
        /*Solves subdomains*/
        void Solve_Subdomains(bvp BoundValProb);
        /*Solves a non-linear problem*/
-       void Solve_SemiLin(int iteration, bvp Lin_BVP,gsl_spline2d *spline_u, gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u); 
+       void Solve_SemiLin(int iteration, bvp Lin_BVP); 
        /*Solves Subdomains of a Semilinear problem*/
-       void Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb, gsl_spline2d *spline_u, gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u);
+       void Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb);
        /*Intermediate Step*/
        //void Intermediate_Step(bvp BoundValProb, std::vector<double> h_vec, std::vector<int> N_vec);
        /*Computes the optimal h and N given a bias and variance estimation*/

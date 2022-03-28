@@ -1,4 +1,4 @@
-nNodes is 37
+nNodes is 125
 Processor 0 ended sending its contribution to G and B
 Processor 0 ended sending its contribution to G and B
 Processor 0 ended sending its contribution to G and B

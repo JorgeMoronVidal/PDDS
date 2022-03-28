@@ -4,6 +4,10 @@
 #include <math.h>
 #include <string.h>
 #include "../BVPs/BVP.hpp"
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_interp2d.h>
+#include <gsl/gsl_spline2d.h>
+#include <gsl/gsl_errno.h>
 #include <boost/random.hpp>
 #include <eigen3/Eigen/Core>
 
@@ -48,6 +52,20 @@ pfscalarN psi, pfscalarN varphi,  pfvector gradient){
   xi +=  Y *(-sigma_aux.transpose()*gradient(X,t)).dot(increment);
   Z += f(X,t)*Y*h + psi(X,N,t)*Y*ji_t;
   Y += c(X,t)*Y*h + varphi(X,N,t) * Y * ji_t;
+  X += b(X,t)*h + sigma_aux*increment;
+  t -= h;
+}
+/*One step of the plain Euler's discretization with Control  and solution given by LUT*/
+inline void Step(Eigen::Vector2d & X, Eigen::Vector2d & N, double & Y, double & Z , double & xi,
+double & t, double ji_t, double h, double sqrth, boost::mt19937 & rng, boost::normal_distribution<double> & normalrng,
+Eigen::Vector2d & increment, pfmatrix sigma, pfscalar2LUT f, pfvector b, pfscalarLUT c, 
+pfscalarN psi, pfscalarN varphi,  pfvector gradient, gsl_spline2d *LUT_u, gsl_interp_accel *xacc_u,
+gsl_interp_accel *yacc_u, gsl_spline2d *LUT_v, gsl_interp_accel *xacc_v, gsl_interp_accel *yacc_v){
+  Eigen::Matrix2d sigma_aux = sigma(X,t);
+  Increment_Update(increment, rng, normalrng, sqrth);
+  xi +=  Y *(-sigma_aux.transpose()*gradient(X,t)).dot(increment);
+  Z += f(X,t,LUT_u,xacc_u,yacc_u,LUT_v,xacc_v,yacc_v)*Y*h + psi(X,N,t)*Y*ji_t;
+  Y += c(X,t,LUT_u,xacc_u,yacc_u)*Y*h + varphi(X,N,t) * Y * ji_t;
   X += b(X,t)*h + sigma_aux*increment;
   t -= h;
 }

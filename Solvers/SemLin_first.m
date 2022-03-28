@@ -79,6 +79,8 @@ save("-ascii",file,"y")
 file = sprintf("Output/Subdomains/Sol_%s_%s.txt", args{2},args{3});
 u = (uu')(:);
 save("-ascii",file,"u")
+file = sprintf("Output/Subdomains/Correction_%s_%s.txt", args{2},args{3});
+save("-ascii",file,"u")
 %rhs(b_west) = interp1(y_west,sol_noisy_west, yy(b_west),'spline');
 %rhs(b_east) = interp1(y_east,sol_noisy_east, yy(b_east),'spline');
 %rhs(b_north) = interp1(x_north,sol_noisy_north, xx(b_north),'spline');

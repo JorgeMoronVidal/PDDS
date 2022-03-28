@@ -711,7 +711,7 @@ void PDDSparseGM::Solve(bvp BoundValProb){
     MPI_Barrier(MPI_COMM_WORLD);
     //MPI_Finalize();
 }
-void PDDSparseGM::Solve_SemiLin(int iteration, bvp BoundValProb, gsl_spline2d *spline_u, gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u){
+void PDDSparseGM::Solve_SemiLin(int iteration, bvp BoundValProb){
     bool done=true;
     //double start = MPI_Wtime();
     if(myid==server) Print_Problem();
@@ -799,12 +799,16 @@ void PDDSparseGM::Solve_SemiLin(int iteration, bvp BoundValProb, gsl_spline2d *s
         //double knot_start, knot_end;
         //G and B storage vectors for each node
         double B_temp, BB_temp;
-        std::vector<double> G_temp, G_var_temp, x, y;
+        std::vector<double> G_temp, G_var_temp, x, y, x_LUT,y_LUT,u_LUT,v_LUT;
+        double *array_x, *array_y, *array_u, *array_v;
         std::vector<int>  G_j_temp, indexes;
         Eigen::Vector2d X0;
         //Stencil
         Stencil stencil;
         EMFKACSolver solver;
+        //spline
+        gsl_spline2d *LUT_u, *LUT_v;
+        gsl_interp_accel *xacc_u, *yacc_u, *xacc_v, *yacc_v;
         c2 = pow(fac*(1.0/(nN[0]-1)),2.0);
         G_i.clear();G_j.clear(); G.clear(); G_CT.clear(); G_var_temp.clear(); 
         B.clear();B_CT.clear();B_i.clear();B_var.clear(); G_var.clear();
@@ -815,8 +819,23 @@ void PDDSparseGM::Solve_SemiLin(int iteration, bvp BoundValProb, gsl_spline2d *s
                 //knot_start = MPI_Wtime();
                 stencil = Compute_Stencil(indexes[knot]);
                 stencil.Compute_ipsi(BoundValProb,c2,debug_fname);
-                Set_LUT_FILE(indexes[knot],spline_u,xacc_u,yacc_u);
                 for(int i = 0; i < 4; i++) stencil.global_parameters[i] = parameters[i];
+                Set_LUT_FILE_Solution(indexes[knot],x_LUT,y_LUT,u_LUT);
+                array_x = new double[x_LUT.size()];for(unsigned int i = 0; i < x_LUT.size(); i++) array_x[i] = x_LUT[i];
+                array_y = new double[y_LUT.size()];for(unsigned int i = 0; i < y_LUT.size(); i++) array_y[i] = y_LUT[i];
+                array_u = new double[u_LUT.size()];for(unsigned int i = 0; i < u_LUT.size(); i++) array_u[i] = u_LUT[i];
+                LUT_u = gsl_spline2d_alloc(gsl_interp2d_bicubic, x_LUT.size(), y_LUT.size());
+                xacc_u = gsl_interp_accel_alloc();
+                yacc_u = gsl_interp_accel_alloc();
+                gsl_spline2d_init(LUT_u, array_x, array_y, array_u, x_LUT.size(), y_LUT.size());
+                Set_LUT_FILE_Correction(indexes[knot],x_LUT,y_LUT,v_LUT);
+                //array_x = new double[x_LUT.size()];for(unsigned int i = 0; i < x_LUT.size(); i++) array_x[i] = x_LUT[i];
+                //array_y = new double[y_LUT.size()];for(unsigned int i = 0; i < y_LUT.size(); i++) array_y[i] = y_LUT[i];
+                array_v = new double[v_LUT.size()];for(unsigned int i = 0; i < v_LUT.size(); i++) array_v[i] = v_LUT[i];
+                LUT_v = gsl_spline2d_alloc(gsl_interp2d_bicubic, x_LUT.size(), y_LUT.size());
+                xacc_v = gsl_interp_accel_alloc();
+                yacc_v = gsl_interp_accel_alloc();
+                gsl_spline2d_init(LUT_v, array_x, array_y, array_v, x_LUT.size(), y_LUT.size());
                 //std::cout << "Solving knot " << indexes[knot] << std::endl;
                 B_temp = 0.0;
                 BB_temp = 0.0;
@@ -824,12 +843,15 @@ void PDDSparseGM::Solve_SemiLin(int iteration, bvp BoundValProb, gsl_spline2d *s
                 G_temp.clear();
                 G_var_temp.clear();
                 X0(0) = x[knot]; X0(1) = y[knot];
+                //printf("LUT defined in [%f %f], [%f %f]\n",array_x[0],array_y[0],array_x[x_LUT.size()-1],array_y[y_LUT.size()-1]);
+                //printf("Point [%f, %f]\n",X0(0),X0(1));
+                //std::cout << gsl_spline2d_eval(LUT,X0(0),X0(1),xacc,yacc) << std::endl;
                 stencil.Reset();
                 solver.Reset_sums();
                 solver.N = 0;
-                solver.Solve_OMP_Analytic(X0,(unsigned int) N,h0, 0.1,
+                solver.Solve_OMP_Semilinear(X0,(unsigned int) N,h0, 0.1,
                 BoundValProb, stencil, c2, G_temp,G_var_temp,G_j_temp,B_temp,
-                BB_temp);
+                BB_temp,LUT_u,xacc_u,yacc_u,LUT_v,xacc_v,yacc_v);
                 B.push_back(B_temp);
                 B_i.push_back(indexes[knot]);
                 B_var.push_back(B_temp*B_temp - BB_temp);
@@ -839,6 +861,7 @@ void PDDSparseGM::Solve_SemiLin(int iteration, bvp BoundValProb, gsl_spline2d *s
                     G.push_back(G_temp[k]);
                     G_var.push_back(G_var_temp[k]);
                 }
+                delete array_x; delete array_y; delete array_u; delete array_v;
                 //knot_end = MPI_Wtime();
                 
             }
@@ -882,13 +905,13 @@ void PDDSparseGM::Send_Node(PDDSJob job){
 }
 void PDDSparseGM::Send_Interface(std::vector<Eigen::Vector2d> positions, std::vector<int> indexes){
     int work_control_aux[2];
-    std::cout << "Expecting demand \n";
+    //std::cout << "Expecting demand \n";
     MPI_Recv(work_control_aux, 2, MPI_INT, MPI_ANY_SOURCE, REQUEST_INTERFACE, world, &status);
-    std::cout << "Demand received \n";
+    //std::cout << "Demand received \n";
     work_control[0] = (int)  positions.size();
     work_control[1] = 1;
     MPI_Send(work_control, 2, MPI_INT, status.MPI_SOURCE, REPLY_INTERFACE, world);
-    std::cout << "Centinel sent\n";
+    //std::cout << "Centinel sent\n";
     double *aux_double;
     int *aux_int;
     aux_double = new double[work_control[0]];
@@ -899,7 +922,7 @@ void PDDSparseGM::Send_Interface(std::vector<Eigen::Vector2d> positions, std::ve
     MPI_Send(aux_double, work_control[0], MPI_DOUBLE, status.MPI_SOURCE, TAG_INTERFACE_Y, world);
     for(int i = 0; i < work_control[0];i++) aux_int[i] = indexes[i];
     MPI_Send(aux_int, work_control[0], MPI_INT, status.MPI_SOURCE, TAG_INTERFACE_INDEX, world);
-    std::cout << "Quantities sent\n";
+    //std::cout << "Quantities sent\n";
 }
 /*void PDDSparseGM::Compute_B_Deterministic(void){
     if(myid == server){
@@ -1399,9 +1422,9 @@ bool PDDSparseGM::Receive_Interface(std::vector<double> & x, std::vector<double>
     //MPI_Comm_rank(workers, &workerid);
 
     MPI_Send(work_control, 2, MPI_INT, server, REQUEST_INTERFACE, world);
-    std::cout << "Sending request\n";
+    //std::cout << "Sending request\n";
     MPI_Recv(work_control, 2, MPI_INT, server, REPLY_INTERFACE, world, MPI_STATUS_IGNORE);
-    std::cout << "Request answered\n";
+    //std::cout << "Request answered\n";
     if(work_control[1] == 1){
         double *aux_double;
         int *aux_int;
@@ -1642,12 +1665,11 @@ gsl_spline2d *spline, gsl_interp_accel *xaccel, gsl_interp_accel *yaccel){
     xaccel = gsl_interp_accel_alloc();
     yaccel = gsl_interp_accel_alloc();
     gsl_spline2d_init(spline, x, y, value, Nx, Ny);
-    gsl_set_error_handler_off();
+    //();
 }
-void PDDSparseGM::Set_LUT_FILE(int index, gsl_spline2d *spline_u, gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u){
+void PDDSparseGM::Set_LUT_FILE_Solution(int index, std::vector<double> & aux_x,std::vector<double> & aux_y,std::vector<double> & aux_sol){
     std::vector<std::vector<int>> subd_index;
     std::vector< std::vector<int> > Iindexes_prev  = Get_Interfaces(index);
-    std::vector<double> aux_x, aux_y, aux_sol;
     std::vector<int> Iindexes;
     for(unsigned int i = 0; i < Iindexes_prev.size(); i++){ Iindexes.push_back(Iindexes_prev[i][0]); Iindexes.push_back(Iindexes_prev[i][1]);}
     char aux_fname[256];
@@ -1740,6 +1762,7 @@ void PDDSparseGM::Set_LUT_FILE(int index, gsl_spline2d *spline_u, gsl_interp_acc
         std::vector<double> y_W, y_E;
         std::vector<double> z_W,z_E;
         unsigned int i,j,cent = 0;
+        aux_x.resize(0); aux_y.resize(0); aux_sol.resize(0);
         for(int l = 0; l < 8; l = l +2){
             if(Iindexes[l+1]%2==0){
                 aux_index[0] = Iindexes[l];
@@ -1751,18 +1774,22 @@ void PDDSparseGM::Set_LUT_FILE(int index, gsl_spline2d *spline_u, gsl_interp_acc
                 i = 0; j = 0;
                 sprintf(aux_fname,"Output/Subdomains/X_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
                 x_W = Read_File(aux_fname);
+                //std::cout << aux_fname << std::endl;
                 sprintf(aux_fname,"Output/Subdomains/Y_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
                 y_W = Read_File(aux_fname);
                 sprintf(aux_fname,"Output/Subdomains/Sol_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
                 z_W = Read_File(aux_fname);
                 sprintf(aux_fname,"Output/Subdomains/X_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
                 x_E = Read_File(aux_fname);
+                //std::cout << aux_fname << std::endl;
                 sprintf(aux_fname,"Output/Subdomains/Y_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
                 y_E = Read_File(aux_fname);
                 sprintf(aux_fname,"Output/Subdomains/Sol_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
                 z_E = Read_File(aux_fname);
-                aux_x.resize(0); aux_y.resize(0); aux_sol.resize(0);
+                //std::cout << y_W.size() << std::endl;
+                //std::cout << aux_y.size() << std::endl;
                 for(j = cent; j < y_W.size(); j++){
+                    //std::cout << y_W[j] << std::endl;
                     aux_y.push_back(y_W[j]);
                     for(i = 0; i < x_W.size(); i++){
                         aux_sol.push_back(z_W[x_W.size()*j + i]);
@@ -1781,11 +1808,155 @@ void PDDSparseGM::Set_LUT_FILE(int index, gsl_spline2d *spline_u, gsl_interp_acc
                 aux_x.push_back(x_E[i]);
         }
     }
-    double *array_x, *array_y, *array_sol;
+    /*double *array_x, *array_y, *array_sol;
     array_x = new double[aux_x.size()];for(unsigned int i = 0; i < aux_x.size(); i++) array_x[i] = aux_x[i];
     array_y = new double[aux_y.size()];for(unsigned int i = 0; i < aux_y.size(); i++) array_y[i] = aux_y[i];
     array_sol = new double[aux_sol.size()];for(unsigned int i = 0; i < aux_sol.size(); i++) array_sol[i] = aux_sol[i];
     Init_LUT(aux_x.size(),aux_y.size(),array_x,array_y,array_sol,spline_u,xacc_u,yacc_u);
+    delete array_x; delete array_y; delete array_sol;
+    */
+}
+void PDDSparseGM::Set_LUT_FILE_Correction(int index, std::vector<double> & aux_x,std::vector<double> & aux_y,std::vector<double> & aux_sol){
+    std::vector<std::vector<int>> subd_index;
+    std::vector< std::vector<int> > Iindexes_prev  = Get_Interfaces(index);
+    std::vector<int> Iindexes;
+    for(unsigned int i = 0; i < Iindexes_prev.size(); i++){ Iindexes.push_back(Iindexes_prev[i][0]); Iindexes.push_back(Iindexes_prev[i][1]);}
+    char aux_fname[256];
+    if(Iindexes.size() == 2){
+        subd_index.resize(2);
+        subd_index[0].resize(2);
+        subd_index[1].resize(2);
+        if(Iindexes[1]%2== 0){
+            //horizontal patch
+            //std::cout << "Horizontal patch\n";
+            subd_index[0][0] = Iindexes[0]; subd_index[0][1] = Iindexes[1]/2;
+            subd_index[1][0] = Iindexes[0]+1; subd_index[1][1] = Iindexes[1]/2;
+            std::vector<double> x_W, x_E;
+            std::vector<double> y_W, y_E;
+            std::vector<double> z_W, z_W_n, z_E, z_E_n;
+            unsigned int i,j;
+            sprintf(aux_fname,"Output/Subdomains/X_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+            x_W = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/Y_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+            y_W = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/Correction_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+            z_W = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/X_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+            x_E = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/Y_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+            y_E = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/Correction_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+            z_E = Read_File(aux_fname);
+            aux_x.resize(0); aux_y.resize(0); aux_sol.resize(0);
+            for(j = 0; j < y_W.size(); j++){
+                aux_y.push_back(y_W[j]);
+                for(i = 0; i < x_W.size(); i++){
+                    aux_sol.push_back(z_W[x_W.size()*j + i]);
+                }
+                for(i = 1; i < x_E.size(); i++){
+                    aux_sol.push_back(z_E[x_W.size()*j + i]);
+                }
+            }
+            for(i = 0; i < x_W.size(); i++){
+                    aux_x.push_back(x_W[i]);
+            }
+            for(i = 1; i < x_E.size(); i++){
+                    aux_x.push_back(x_E[i]);
+            }
+        }else{
+            //vertical patch
+            //std::cout << "Vertical patch\n";
+            subd_index[0][0] = Iindexes[0]; subd_index[0][1] = (Iindexes[1]-1)/2;
+            subd_index[1][0] = Iindexes[0]; subd_index[1][1] = 1+((Iindexes[1]-1)/2);
+            std::vector<double> x_N, x_S;
+            std::vector<double> y_N, y_S;
+            std::vector<double> z_N, z_S;
+            unsigned int i,j;
+            sprintf(aux_fname,"Output/Subdomains/X_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+            x_S = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/Y_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+            y_S = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/Correction_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+            z_S = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/X_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+            x_N = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/Y_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+            y_N = Read_File(aux_fname);
+            sprintf(aux_fname,"Output/Subdomains/Correction_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+            z_N = Read_File(aux_fname);
+            aux_x.resize(0); aux_y.resize(0); aux_sol.resize(0);
+            for(j = 0; j < y_S.size(); j++){
+                aux_y.push_back(y_S[j]);
+                for(i = 0; i < x_S.size(); i++){
+                    aux_sol.push_back(z_S[x_S.size()*j + i]);
+                }
+            }
+            for(j = 1; j < y_N.size(); j++){
+                aux_y.push_back(y_N[j]);
+                for(i = 0; i < x_S.size(); i++){
+                    aux_sol.push_back(z_N[x_S.size()*j + i]);
+                }
+            }
+            for(i = 0; i < x_S.size(); i++){
+                    aux_x.push_back(x_S[i]);
+            }
+        }
+    }else{
+        //Knot belongs to 4 interfaces (It is on an intersection)
+        //std::cout << "Squared patch\n";
+        std::vector<int> aux_index;
+        aux_index.resize(2);
+        subd_index.resize(2);
+        std::vector<double> x_W, x_E;
+        std::vector<double> y_W, y_E;
+        std::vector<double> z_W,z_E;
+        unsigned int i,j,cent = 0;
+        aux_x.resize(0); aux_y.resize(0); aux_sol.resize(0);
+        for(int l = 0; l < 8; l = l +2){
+            if(Iindexes[l+1]%2==0){
+                aux_index[0] = Iindexes[l];
+                aux_index[1] = Iindexes[l+1]/2;
+                subd_index[0] = aux_index;
+                aux_index[0] = Iindexes[l] + 1;
+                aux_index[1] = Iindexes[l+1]/2;
+                subd_index[1] = aux_index;
+                i = 0; j = 0;
+                sprintf(aux_fname,"Output/Subdomains/X_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+                x_W = Read_File(aux_fname);
+                //std::cout << aux_fname << std::endl;
+                sprintf(aux_fname,"Output/Subdomains/Y_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+                y_W = Read_File(aux_fname);
+                sprintf(aux_fname,"Output/Subdomains/Correction_%d_%d.txt",subd_index[0][0],subd_index[0][1]);
+                z_W = Read_File(aux_fname);
+                sprintf(aux_fname,"Output/Subdomains/X_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+                x_E = Read_File(aux_fname);
+                //std::cout << aux_fname << std::endl;
+                sprintf(aux_fname,"Output/Subdomains/Y_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+                y_E = Read_File(aux_fname);
+                sprintf(aux_fname,"Output/Subdomains/Correction_%d_%d.txt",subd_index[1][0],subd_index[1][1]);
+                z_E = Read_File(aux_fname);
+                //std::cout << y_W.size() << std::endl;
+                //std::cout << aux_y.size() << std::endl;
+                for(j = cent; j < y_W.size(); j++){
+                    //std::cout << y_W[j] << std::endl;
+                    aux_y.push_back(y_W[j]);
+                    for(i = 0; i < x_W.size(); i++){
+                        aux_sol.push_back(z_W[x_W.size()*j + i]);
+                    }
+                    for(i = 1; i < x_E.size(); i++){
+                       aux_sol.push_back(z_E[x_W.size()*j + i]);
+                    }
+                }
+                cent ++;
+            }
+        }
+        for(i = 0; i < x_W.size(); i++){
+                aux_x.push_back(x_W[i]);
+        }
+        for(i = 1; i < x_E.size(); i++){
+                aux_x.push_back(x_E[i]);
+        }
+    }
 }
 Stencil PDDSparseGM::Recieve_Stencil_Data_Loop(void){
     int size[1];
@@ -2916,8 +3087,7 @@ void PDDSparseGM::Solve_Subdomains(bvp BoundValProb){
     }
     //MPI_Finalize();
 }
-void PDDSparseGM::Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb, gsl_spline2d *spline_u,
-                                           gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u){
+void PDDSparseGM::Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb){
     if(myid == server){
         Read_Solution();
         Fullfill_subdomains(BoundValProb);

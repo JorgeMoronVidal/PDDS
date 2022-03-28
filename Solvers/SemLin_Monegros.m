@@ -155,7 +155,7 @@ file = sprintf("Output/Subdomains/Correction_%s_%s.txt", args{2},args{3});
 v = (vv')(:);
 save("-ascii",file,"v");
 file = sprintf("Output/Subdomains/Sol_%s_%s.txt", args{2},args{3});
-u = (vv'+uu_LUT)(:);
+u = (vv'+'uu_LUT')(:);
 save("-ascii",file,"u");
 %rhs(b_west) = interp1(y_west,sol_noisy_west, yy(b_west),'spline');
 %rhs(b_east) = interp1(y_east,sol_noisy_east, yy(b_east),'spline');

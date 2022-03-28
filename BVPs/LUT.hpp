@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 #include <eigen3/Eigen/Core>
 #include <vector>
 #include <gsl/gsl_math.h>
@@ -11,6 +11,7 @@
 #define LUT
 /*Variables and functions that manage with LUT in BVPs*/
 /*LUT auxiliary global variables. This part only works with 2D problems*/
+/*
 gsl_spline2d *spline_u,*spline_g,*spline_p,*spline_f,*spline_c,*spline_sigma_00,*spline_sigma_01,
 *spline_sigma_10,*spline_sigma_11,*spline_b_0,*spline_b_1,*spline_gradient,*spline_psi,*spline_varphi,
 *spline_distance;
@@ -149,4 +150,4 @@ gsl_interp_accel *yaccel){
     infile.close();
     Init_LUT(len[0],len[1],x[1],x[2],z,spline,xaccel,yaccel);
 }
-#endif
+#endif*/
