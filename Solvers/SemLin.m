@@ -83,6 +83,8 @@ N = size(x_north)(1); [Dx,Dy,x,y] = cheb(N,x_north,y_west);
 [xx,yy] = meshgrid(x,y);
 rhs = (interp2(xx_LUT,yy_LUT,vv_LUT,xx,yy,'spline').^2).*(3*(interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline'))-2*interp2(xx_LUT,yy_LUT,vv_LUT,xx,yy,'spline'));
 rhs = rhs(:);
+uu_LUT = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline');
+vv_LUT = interp2(xx_LUT,yy_LUT,vv_LUT,xx,yy,'spline');
 xx = xx(:); yy = yy(:);
 D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I)-3*diag((interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'cubic')).^2);
 %Impose boundary conditions and -f function by replacing appropriate rows of L:
