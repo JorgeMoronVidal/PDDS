@@ -245,6 +245,10 @@ class PDDSparseGM{
        void Print_Interface(void);
        /*Reads solution file*/
        void Read_Solution(void);
+       /*Random solution into interfaces*/
+       void Random_Solution(double constant);
+       /*Fullfills subdomains with random numbers*/
+       void Fullfill_Subdomains_Random(bvp BoundValProb, double constant);
        /*Solves subdomains*/
        void Solve_Subdomains(bvp BoundValProb);
        /*Solves a non-linear problem*/

@@ -3019,6 +3019,17 @@ void PDDSparseGM::Read_Solution(void){
    }
    solution_file.close();
 }
+void PDDSparseGM::Random_Solution(double constant){
+    for(std::vector<Interface>::iterator interface = interfaces.begin();
+    interface != interfaces.end();
+    interface ++){
+        for(uint32_t interface_index = 0;
+            interface_index < (*interface).index.size();
+            interface_index ++){
+            (*interface).solution[interface_index] = (constant*std::rand())/RAND_MAX;
+        }
+    }
+}
 void PDDSparseGM::Fullfill_subdomains(bvp BoundValProb){
     subdomains.clear();
     Subdomain subdomain_aux;
@@ -3091,7 +3102,7 @@ void PDDSparseGM::Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb){
     if(myid == server){
         Read_Solution();
         Fullfill_subdomains(BoundValProb);
-        Update_TimeFile("Fullfilling subdomains",1);
+        Update_TimeFile("FullfillinFullfill_subg subdomains",1);
         for(std::vector<Subdomain>::iterator it_subdomain = subdomains.begin();
             it_subdomain != subdomains.end();
             it_subdomain ++){
@@ -3119,7 +3130,37 @@ void PDDSparseGM::Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb){
     }
 
 }
-
+void PDDSparseGM::Fullfill_Subdomains_Random(bvp BoundValProb,double constant){
+    if(myid == server){
+        Read_Solution();
+        Fullfill_subdomains(BoundValProb);
+        for(std::vector<Subdomain>::iterator it_subdomain = subdomains.begin();
+            it_subdomain != subdomains.end();
+            it_subdomain ++){
+            MPI_Recv(work_control, 2, MPI_INT, MPI_ANY_SOURCE, ASK_SERVER, world, &status);
+            work_control[0] = SEND_WORK;
+            MPI_Send(work_control, 2, MPI_INT, status.MPI_SOURCE, REPLY_WORKER, world);
+            (*it_subdomain).Send_To_Worker(status,world);
+        }
+        for(int i = 0; i<server; i++){
+            MPI_Recv(work_control, 2, MPI_INT, MPI_ANY_SOURCE, ASK_SERVER, world, &status);
+            work_control[0] = END_WORKER;
+            MPI_Send(work_control, 2, MPI_INT, status.MPI_SOURCE, REPLY_WORKER, world);
+        }
+        Update_TimeFile("Fullfilling subdomains Random",1);
+    } else {
+        Subdomain subdomain;
+        do{
+            MPI_Send(work_control, 2, MPI_INT, server, ASK_SERVER, world);
+            MPI_Recv(work_control, 2, MPI_INT, server, REPLY_WORKER, world, &status);
+            if(work_control[0] == SEND_WORK){
+                subdomain.Recieve_From_Server(server, world);
+                subdomain.Fullfill_Random(world,constant);
+            }
+        }while(work_control[0] == SEND_WORK);
+    }
+    //MPI_Finalize();
+}
 /*void PDDSparseGM::Solve_NumVR(bvp BoundValProb, std::vector<double> h_vec, std::vector<int> N_vec){
     bool done=true;
     //double start = MPI_Wtime();

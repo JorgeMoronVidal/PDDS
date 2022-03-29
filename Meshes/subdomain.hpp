@@ -39,8 +39,10 @@ class Subdomain{
               std::vector<double> boundary_params, bvp BoundValProb);
     //Solves the BVP in the subdomain
     void Solve(MPI_Comm & world);
-    //Solves the BVP in the subdomain
+    //Solves the linearised BVP in the subdomain
     void Solve_NL(MPI_Comm & world);
+    //Fullfills sol and correction with random numbers
+    void Fullfill_Random(MPI_Comm & world, double constant);
     //Sends the subdomain information to the worker
     void Send_To_Worker(MPI_Status & status, MPI_Comm & world);
     void Send_direction(MPI_Status & status, MPI_Comm & world, direction dir);

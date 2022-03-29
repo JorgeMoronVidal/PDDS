@@ -1,0 +1,48 @@
+#! octave-qf
+args = argv();
+id = args{1};
+file = sprintf("Input/Interfaces/North_%s.txt", id);
+table = csvread(file);
+x_north = table(:,1);
+y_north = table(:,2);
+sol_north = table(:,3);
+clear table;
+file = sprintf("Input/Interfaces/South_%s.txt", id);
+table = csvread(file);
+x_south = table(:,1);
+y_south = table(:,2);
+sol_south = table(:,3);
+clear table;
+file = sprintf("Input/Interfaces/East_%s.txt", id);
+table = csvread(file);
+x_east = table(:,1);
+y_east = table(:,2);
+sol_east = table(:,3);
+clear table;
+file = sprintf("Input/Interfaces/West_%s.txt", id);
+table = csvread(file);
+x_west = table(:,1);
+y_west = table(:,2);
+sol_west = table(:,3);
+clear table;
+[xx,yy] = meshgrid(x_north,y_west);
+rand("seed",str2num(args{2})*10+str2num(args{2}));
+rhs =rand(size(xx));
+rhs = rhs(:)*str2num(args{4});
+xx = xx(:); yy = yy(:);
+b_west = find(xx==x_west(1));
+rhs(b_west) = interp1(y_west,sol_west, yy(b_west),'spline');
+b_east = find(xx==x_east(1));
+rhs(b_east) = interp1(y_east,sol_east, yy(b_east),'spline');
+b_north = find(yy==y_north(1));
+rhs(b_north) = interp1(x_north,sol_north, xx(b_north),'spline');
+b_south = find(yy==y_south(1));
+rhs(b_south) = interp1(x_south,sol_south, xx(b_south),'spline');
+file = sprintf("Output/Subdomains/X_%s_%s.txt", args{2},args{3});
+save("-ascii",file,"x_north")
+file = sprintf("Output/Subdomains/Y_%s_%s.txt", args{2},args{3});
+save("-ascii",file,"y_west")
+file = sprintf("Output/Subdomains/Correction_%s_%s.txt", args{2},args{3});
+save("-ascii",file,"rhs");
+file = sprintf("Output/Subdomains/Sol_%s_%s.txt", args{2},args{3});
+save("-ascii",file,"rhs");

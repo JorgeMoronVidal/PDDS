@@ -77,6 +77,49 @@ void Subdomain::Init(std::vector<int> subdomain_label, std::map<direction,
     }
 }
 //Solves the BVP in the subdomain
+void Subdomain::Solve(MPI_Comm & world){
+    //id of the process that it is solving the subdomain
+    int myid;
+    MPI_Comm_rank(world, &myid);
+    std::stringstream aux_ss;
+    FILE *pf;
+    std::vector<direction> directions{North, South, East, West};
+    char summon_Octave[256];
+    //sprintf(summon_Octave,"octave-cli Poisson_eq_3.m %d %d %d",myid,label[0],label[1]);
+    sprintf(summon_Octave,"octave-cli Solvers/SemLin_first.m %d %d %d",myid,label[0],label[1]);
+    for(std::vector<direction>::iterator direction_iterator = directions.begin();
+    direction_iterator != directions.end();
+    direction_iterator ++){
+        aux_ss.str("");
+        switch (*direction_iterator){
+            case North:
+                aux_ss << "Input/Interfaces/North_" << myid << ".txt";
+            break;
+            case South:
+                aux_ss << "Input/Interfaces/South_" << myid << ".txt";
+            break;
+            case East:
+                aux_ss << "Input/Interfaces/East_" << myid << ".txt";
+            break;
+            case West:
+                aux_ss << "Input/Interfaces/West_" << myid << ".txt";
+            break;
+            default:
+            std::cout << "Something went wrong writing files during Subdomain.Solve()" << std::endl;
+        }
+        //std::cout << aux_ss.str() << std::endl;
+        pf = fopen(aux_ss.str().c_str(),"w");
+        for(uint32_t i = 0;
+            i < interfaces[*direction_iterator].position.size();
+            i++){
+            fprintf(pf,"%f,%f,%f,%f\n",interfaces[*direction_iterator].position[i][0]
+            ,interfaces[*direction_iterator].position[i][1],interfaces[*direction_iterator].solution[i],
+            interfaces[*direction_iterator].solution_noisy[i]);
+        }
+        fclose(pf);
+    }
+    system(summon_Octave);
+}
 void Subdomain::Solve_NL(MPI_Comm & world){
     //id of the process that it is solving the subdomain
     int myid;
@@ -120,7 +163,7 @@ void Subdomain::Solve_NL(MPI_Comm & world){
     }
     system(summon_Octave);
 }
-void Subdomain::Solve(MPI_Comm & world){
+void Subdomain::Fullfill_Random(MPI_Comm & world, double constant){
     //id of the process that it is solving the subdomain
     int myid;
     MPI_Comm_rank(world, &myid);
@@ -129,7 +172,7 @@ void Subdomain::Solve(MPI_Comm & world){
     std::vector<direction> directions{North, South, East, West};
     char summon_Octave[256];
     //sprintf(summon_Octave,"octave-cli Poisson_eq_3.m %d %d %d",myid,label[0],label[1]);
-    sprintf(summon_Octave,"octave-cli Solvers/SemLin_first.m %d %d %d",myid,label[0],label[1]);
+    sprintf(summon_Octave,"octave-cli Solvers/Init_Rand.m %d %d %d %f",myid,label[0],label[1], constant);
     for(std::vector<direction>::iterator direction_iterator = directions.begin();
     direction_iterator != directions.end();
     direction_iterator ++){
