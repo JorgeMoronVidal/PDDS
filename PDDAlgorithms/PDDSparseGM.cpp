@@ -3020,6 +3020,9 @@ void PDDSparseGM::Read_Solution(void){
    solution_file.close();
 }
 void PDDSparseGM::Random_Solution(double constant){
+    FILE *ofile;
+    ofile = fopen("Output/solution.csv","w");
+    fprintf(ofile,"Knot_index,x,y,sol_analytic,sol_PDDS,err,rerr\n");
     for(std::vector<Interface>::iterator interface = interfaces.begin();
     interface != interfaces.end();
     interface ++){
@@ -3027,8 +3030,12 @@ void PDDSparseGM::Random_Solution(double constant){
             interface_index < (*interface).index.size();
             interface_index ++){
             (*interface).solution[interface_index] = (constant*std::rand())/RAND_MAX;
+            fprintf(ofile,"%d,%e,%e,%e,0.0,0.0,0.0\n",(*interface).index[interface_index],
+            Node_Position((*interface).index[interface_index])[0],
+            Node_Position((*interface).index[interface_index])[1],(*interface).solution[interface_index]);
         }
     }
+    fclose(ofile);
 }
 void PDDSparseGM::Fullfill_subdomains(bvp BoundValProb){
     subdomains.clear();
@@ -3132,7 +3139,7 @@ void PDDSparseGM::Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb){
 }
 void PDDSparseGM::Fullfill_Subdomains_Random(bvp BoundValProb,double constant){
     if(myid == server){
-        Read_Solution();
+        Random_Solution(constant);
         Fullfill_subdomains(BoundValProb);
         for(std::vector<Subdomain>::iterator it_subdomain = subdomains.begin();
             it_subdomain != subdomains.end();
@@ -3147,6 +3154,7 @@ void PDDSparseGM::Fullfill_Subdomains_Random(bvp BoundValProb,double constant){
             work_control[0] = END_WORKER;
             MPI_Send(work_control, 2, MPI_INT, status.MPI_SOURCE, REPLY_WORKER, world);
         }
+        
         Update_TimeFile("Fullfilling subdomains Random",1);
     } else {
         Subdomain subdomain;
