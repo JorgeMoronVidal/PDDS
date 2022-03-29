@@ -26,10 +26,10 @@ int main(int argc, char *argv[]){
     //First iteration
     //PDDS.Solve(boundvalprob);
     //PDDS.Solve_Subdomains(boundvalprob);
-    PDDS.Fullfill_Subdomains_Random(boundvalprob,0.5);
+    PDDS.Fullfill_Subdomains_Random(boundvalprob,0.1);
     //Following iterations
-    for(int i = 0; i < 5; i++){
-        PDDS.Solve_SemiLin(i,nonlinboundprob);
-        PDDS.Solve_Subdomains_SemiLin(i,nonlinboundprob);
-    }
+    //for(int i = 0; i < 5; i++){
+    //    PDDS.Solve_SemiLin(i,nonlinboundprob);
+    //    PDDS.Solve_Subdomains_SemiLin(i,nonlinboundprob);
+    //}
 }
