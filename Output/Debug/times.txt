@@ -1,4 +1,5 @@
 task,total_tike,task_time,N_process
-Reading configuration File,5.072126e-04,5.064721e-04,2
-Fullfilling interfaces,1.318842e-03,8.116294e-04,1
-Fullfilling subdomains Random,4.534738e-01,4.521549e-01,1
+Reading configuration File,5.106468e-04,5.099581e-04,2
+Fullfilling interfaces,1.967686e-03,1.457039e-03,1
+FullfillinFullfill_subg subdomains,2.487023e-02,2.290254e-02,1
+Solving subdomains,3.945149e+01,3.942662e+01,2
