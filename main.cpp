@@ -24,12 +24,12 @@ int main(int argc, char *argv[]){
     std::string config("configuration.txt");
     PDDSparseGM PDDS(argc,argv,config);
     //First iteration
-    //PDDS.Solve(boundvalprob);
-    //PDDS.Solve_Subdomains(boundvalprob);
-    //PDDS.Fullfill_Subdomains_Random(nonlinboundprob,0.1);
-    //Following iterations
-    //for(int i = 0; i < 5; i++){
-        //PDDS.Solve_SemiLin(i,nonlinboundprob);
+    PDDS.Solve(boundvalprob);
+    PDDS.Solve_Subdomains(boundvalprob);
+    PDDS.Fullfill_Subdomains_Random(nonlinboundprob,0.1);
+    Following iterations
+    for(int i = 0; i < 5; i++){
+        PDDS.Solve_SemiLin(i,nonlinboundprob);
         PDDS.Solve_Subdomains_SemiLin(2,nonlinboundprob);
-    //}
+    }
 }

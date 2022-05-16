@@ -55,7 +55,7 @@ pfscalarN psi, pfscalarN varphi,  pfvector gradient){
   X += b(X,t)*h + sigma_aux*increment;
   t -= h;
 }
-/*One step of the plain Euler's discretization with Control  and solution given by LUT*/
+/*One step of the plain Euler's discretization with Control Variates  and solution given by LUT*/
 inline void Step(Eigen::Vector2d & X, Eigen::Vector2d & N, double & Y, double & Z , double & xi,
 double & t, double ji_t, double h, double sqrth, boost::mt19937 & rng, boost::normal_distribution<double> & normalrng,
 Eigen::Vector2d & increment, pfmatrix sigma, pfscalar2LUT f, pfvector b, pfscalarLUT c, 
@@ -65,6 +65,34 @@ gsl_interp_accel *yacc_u, gsl_spline2d *LUT_v, gsl_interp_accel *xacc_v, gsl_int
   Increment_Update(increment, rng, normalrng, sqrth);
   xi +=  Y *(-sigma_aux.transpose()*gradient(X,t)).dot(increment);
   Z += f(X,t,LUT_u,xacc_u,yacc_u,LUT_v,xacc_v,yacc_v)*Y*h + psi(X,N,t)*Y*ji_t;
+  Y += c(X,t,LUT_u,xacc_u,yacc_u)*Y*h + varphi(X,N,t) * Y * ji_t;
+  X += b(X,t)*h + sigma_aux*increment;
+  t -= h;
+}
+/*One step of the plain Euler's discretization with Control Variates  and solution given by LUT*/
+inline void Step(Eigen::Vector2d & X, Eigen::Vector2d & N, double & Y, double & Z , double & xi,
+double & t, double ji_t, double h, double sqrth, boost::mt19937 & rng, boost::normal_distribution<double> & normalrng,
+Eigen::Vector2d & increment, pfmatrix sigma, pfscalar2LUT f, pfvector b, pfscalarLUT c, 
+pfscalarN psi, pfscalarN varphi,  pfvectorLUT gradient, gsl_spline2d *LUT_u, gsl_interp_accel *xacc_u,
+gsl_interp_accel *yacc_u, gsl_spline2d *LUT_v, gsl_interp_accel *xacc_v, gsl_interp_accel *yacc_v){
+  Eigen::Matrix2d sigma_aux = sigma(X,t);
+  Increment_Update(increment, rng, normalrng, sqrth);
+  xi +=  Y *(-sigma_aux.transpose()*gradient(X,t,LUT_v,xacc_v,yacc_v)).dot(increment);
+  Z += f(X,t,LUT_u,xacc_u,yacc_u,LUT_v,xacc_v,yacc_v)*Y*h + psi(X,N,t)*Y*ji_t;
+  Y += c(X,t,LUT_u,xacc_u,yacc_u)*Y*h + varphi(X,N,t) * Y * ji_t;
+  X += b(X,t)*h + sigma_aux*increment;
+  t -= h;
+}
+/*One step of the plain Euler's discretization with Control Variates estimated with previous steps information and solution given by LUT*/
+inline void Step(Eigen::Vector2d & X, Eigen::Vector2d & N, double & Y, double & Z , double & xi,
+double & t, double ji_t, double h, double sqrth, boost::mt19937 & rng, boost::normal_distribution<double> & normalrng,
+Eigen::Vector2d & increment, pfmatrix sigma, pfscalarLUT f, pfvector b, pfscalarLUT c, 
+pfscalarN psi, pfscalarN varphi,  pfvectorLUT gradient, gsl_spline2d *LUT_u, gsl_interp_accel *xacc_u,
+gsl_interp_accel *yacc_u){
+  Eigen::Matrix2d sigma_aux = sigma(X,t);
+  Increment_Update(increment, rng, normalrng, sqrth);
+  xi +=  Y *(-sigma_aux.transpose()*gradient(X,t,LUT_u,xacc_u,yacc_u)).dot(increment);
+  Z += f(X,t,LUT_u,xacc_u,yacc_u)*Y*h + psi(X,N,t)*Y*ji_t;
   Y += c(X,t,LUT_u,xacc_u,yacc_u)*Y*h + varphi(X,N,t) * Y * ji_t;
   X += b(X,t)*h + sigma_aux*increment;
   t -= h;

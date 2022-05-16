@@ -24,6 +24,9 @@ typedef Eigen::Vector2d (*pfvector)(Eigen::Vector2d, double);
 typedef Eigen::Vector2d (*pfvectorLUT)(Eigen::Vector2d, double ,
                 gsl_spline2d *, gsl_interp_accel *,
                 gsl_interp_accel *);
+typedef Eigen::Vector2d (*pfvector2LUT)(Eigen::Vector2d, double ,
+                gsl_spline2d *, gsl_interp_accel *, gsl_interp_accel *, 
+                gsl_spline2d *, gsl_interp_accel *, gsl_interp_accel *);
 typedef Eigen::Matrix2d (*pfmatrix)(Eigen::Vector2d, double);
 typedef double (*pfdist)(double *,Eigen::Vector2d, Eigen::Vector2d &, Eigen::Vector2d &);
 typedef bool (*pfbtype)(Eigen::Vector2d);
@@ -85,6 +88,8 @@ inline double Default_RBF(Eigen::Vector2d X, Eigen::Vector2d X_j, double c){
 struct bvp{
         //-u(Eigen::Vector2d position, double t) is the solution of the problem.
         pfscalar u = Default_Scalar;
+        //-u(Eigen::Vector2d position, double t) is the solution of the problem.
+        pfscalarLUT num_u = Default_ScalarLUT;
         //-g(Eigen::Vector2d position, double t) is the value of the problem on the dirichlet BC's.
         pfscalar g = Default_Scalar;
         //-p(Eigen::Vector2d position) is the initial condition [solution when t= 0] of the BVP.
@@ -92,7 +97,9 @@ struct bvp{
         //-f(Eigen::Vector2d position, double t) is the source term of the BVP's PDE.
         pfscalar f = Default_Scalar;
         //Numerical f
-        pfscalar2LUT num_f = Default_Scalar2LUT;
+        pfscalarLUT num_f = Default_ScalarLUT;
+        //Numerical f two LUT
+        pfscalar2LUT num_f_2LUT = Default_Scalar2LUT;
         //-c(Eigen::Vector2d position, double t) is the reactions term in the BVP's PDE. Has to be negative.
         pfscalar c = Default_Scalar;
         //Numerical c
@@ -104,7 +111,9 @@ struct bvp{
         //-grad_u(Eigen::Vector2d position, double t) gradient of the solution. It is important for variance reduction purposes.
         pfvector gradient = Default_Vector;
         //-grad_u(Eigen::Vector2d position, double t) gradient of the solution. It is important for variance reduction purposes.
-        pfvector num_gradient = Default_Vector;
+        pfvectorLUT num_gradient_LUT = Default_VectorLUT;
+        //-grad_u(Eigen::Vector2d position, double t) gradient of the solution. It is important for variance reduction purposes.
+        //pfvector2LUT num_gradient_2LUT = Default_Vector;
         //-F function for control variates
         pfvector F = Default_Vector;
         //-mu function for variance reduction

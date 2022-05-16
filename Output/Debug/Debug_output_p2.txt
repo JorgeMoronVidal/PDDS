@@ -1,2 +1,6 @@
-nNodes is 180
-Processor 32767 ended sending its contribution to G and B
+nNodes is 741
+Processor 0 ended sending its contribution to G and B
+Processor 0 ended sending its contribution to G and B
+Processor 0 ended sending its contribution to G and B
+Processor 0 ended sending its contribution to G and B
+Processor 0 ended sending its contribution to G and B
