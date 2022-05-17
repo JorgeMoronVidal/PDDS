@@ -12,12 +12,11 @@ int main(int argc, char *argv[]){
     boundvalprob.sigma = EquationSM_sigma;
     boundvalprob.distance = Rectangle2D;
     boundvalprob.absorbing = Stopping;
-    boundvalprob.c = EquationSM_c;
     bvp nonlinboundprob;
     nonlinboundprob.u = EquationSM_u;
     nonlinboundprob.g = EquationSM_g;
     nonlinboundprob.num_f = EquationSM_f_LUT;
-    nonlinboundprob.num_c = EquationSM_c_LUT;
+    nonlinboundprob.num_c = EquationSM_c;
     nonlinboundprob.num_u = EquationSM_u_LUT;
     nonlinboundprob.num_gradient_LUT = EquationSM_grad_LUT;
     nonlinboundprob.sigma = EquationSM_sigma;
@@ -32,7 +31,7 @@ int main(int argc, char *argv[]){
     //PDDS.Fullfill_Subdomains_Random(nonlinboundprob,0.1);
     //Following iterations
     for(int i = 0; i < 4; i++){
-        PDDS.Solve_SemiLin_numVR(i,nonlinboundprob);
+        PDDS.Solve_Iterative_numVR(i,nonlinboundprob);
         PDDS.Solve_Subdomains_SemiLin(2,nonlinboundprob);
     }
 }

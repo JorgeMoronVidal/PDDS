@@ -259,7 +259,7 @@ public:
                         Step(X,normal,Y,Z,xi,t,ji_t,h,sqrth,RNG[id],normal_dist[id],
                         increment,BoundaryValueProblem.sigma,BoundaryValueProblem.num_f_2LUT,
                         BoundaryValueProblem.b,BoundaryValueProblem.num_c,BoundaryValueProblem.psi,
-                        BoundaryValueProblem.varphi, BoundaryValueProblem.gradient,LUT_u,xacc_u,yacc_u,
+                        BoundaryValueProblem.varphi, BoundaryValueProblem.num_gradient_LUT,LUT_u,xacc_u,yacc_u,
                         LUT_v,xacc_v,yacc_v);
                         RNGCalls_thread += 2;
                     }else{

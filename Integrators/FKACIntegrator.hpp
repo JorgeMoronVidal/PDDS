@@ -77,7 +77,7 @@ pfscalarN psi, pfscalarN varphi,  pfvectorLUT gradient, gsl_spline2d *LUT_u, gsl
 gsl_interp_accel *yacc_u, gsl_spline2d *LUT_v, gsl_interp_accel *xacc_v, gsl_interp_accel *yacc_v){
   Eigen::Matrix2d sigma_aux = sigma(X,t);
   Increment_Update(increment, rng, normalrng, sqrth);
-  xi +=  Y *(-sigma_aux.transpose()*gradient(X,t,LUT_v,xacc_v,yacc_v)).dot(increment);
+  xi +=  Y *(-sigma_aux.transpose()*gradient(X,t,LUT_u,xacc_u,yacc_u)).dot(increment);
   Z += f(X,t,LUT_u,xacc_u,yacc_u,LUT_v,xacc_v,yacc_v)*Y*h + psi(X,N,t)*Y*ji_t;
   Y += c(X,t,LUT_u,xacc_u,yacc_u)*Y*h + varphi(X,N,t) * Y * ji_t;
   X += b(X,t)*h + sigma_aux*increment;

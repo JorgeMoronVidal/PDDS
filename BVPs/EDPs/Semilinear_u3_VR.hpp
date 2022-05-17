@@ -7,7 +7,7 @@
 #include <gsl/gsl_errno.h>
 //#include "../LUT.hpp"
 inline double EquationSM_u(Eigen::Vector2d X, double t){
-    return sin(M_PI*X(0))*sin(M_PI*X(1));
+    return 1.0+sin(M_PI*X(0))*sin(M_PI*X(1));
 }
 inline double EquationSM_d2udx2(Eigen::Vector2d X){
     return - M_PI*M_PI*EquationSM_u(X,0.0);
@@ -18,23 +18,26 @@ inline double EquationSM_d2udy2(Eigen::Vector2d X){
 inline Eigen::Matrix2d EquationSM_sigma(Eigen::Vector2d X, double t){
     return Eigen::Matrix2d::Identity() * 1.41421356237;
 }
-inline double EquationSM_c(Eigen::Vector2d X, double t,gsl_spline2d *LUT, gsl_interp_accel *xacc,
+inline double EquationSM_c(Eigen::Vector2d X, double t){
+    return -3.0;
+}
+inline double EquationSM_c_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT, gsl_interp_accel *xacc,
                 gsl_interp_accel *yacc){
     return -3.0*pow(gsl_spline2d_eval(LUT, X(0), X(1), xacc, yacc),2);
 }
 inline double EquationSM_f(Eigen::Vector2d X, double t){
-    return +2*M_PI*M_PI*EquationSM_u(X,0.0) + pow(EquationSM_u(X,t),3);
+    return +2*M_PI*M_PI*sin(M_PI*X(0))*sin(M_PI*X(1))+ 2.0 + pow(EquationSM_u(X,0.0),3.0);
 }
 inline double EquationSM_f_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT, gsl_interp_accel *xacc,
                 gsl_interp_accel *yacc){
-    return EquationSM_f(X,t) + 2.0*pow(gsl_spline2d_eval(LUT, X(0), X(1), xacc, yacc),3);
+    return EquationSM_f(X,t) - 2.0 + 2.0*pow(gsl_spline2d_eval(LUT, X(0), X(1), xacc, yacc),3);
 }
 inline double EquationSM_u_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT, gsl_interp_accel *xacc,
                 gsl_interp_accel *yacc){
     return gsl_spline2d_eval(LUT, X(0), X(1), xacc, yacc);
 }
 inline double EquationSM_g(Eigen::Vector2d X, double t){
-    return 0.0;
+    return 1.0;
 }
 Eigen::Vector2d Equation_grad(Eigen::Vector2d X, double t){
     Eigen::Vector2d grad;

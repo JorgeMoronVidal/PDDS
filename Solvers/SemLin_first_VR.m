@@ -54,13 +54,13 @@ sol_west = table(:,3);
 clear table;
 N = size(x_north)(1); [Dx,Dy,x,y] = cheb(N,x_north,y_west);
 [xx,yy] = meshgrid(x,y); xx = xx(:); yy = yy(:);
-D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I);
+D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I) - 3*eye(size(kron(I,D2x)));
 %Impose boundary conditions and -f function by replacing appropriate rows of L:
 b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
 L(b,:) = zeros(4*N,(N+1)^2); 
 L(b,b) = eye(4*N);
-rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) - (sin(pi*xx).*sin(pi*yy)).^3;
+rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) - (ones(size(xx)) + sin(pi*xx).*sin(pi*yy)).^3 - 2*ones(size(xx));
 %rhs(b) = sin(omegax*pi*xx(b) + omegay*pi*yy(b)) + cos(omegapx*pi*xx(b) + omegapy*pi*yy(b));
 b_west = find(xx==x_west(1));
 rhs(b_west) = interp1(y_west,sol_west, yy(b_west),'spline');

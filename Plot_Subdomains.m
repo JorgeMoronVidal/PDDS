@@ -48,7 +48,7 @@ for l = 1:length(Iterations)
       %colormap(Correction,'jet');
       %s = surf(xx,yy,vv);
       %s.EdgeColor = 'none';
-      uu_a = sin(pi*xx).*sin(pi*yy);
+      uu_a = ones(size(xx)) + sin(pi*xx).*sin(pi*yy);
       subplot(Error)
       %cyclic_cmap = [gray;flip(gray)];
       colormap(Error, error_cmap);
@@ -71,7 +71,7 @@ for l = 1:length(Iterations)
    xlabel('X')
    ylabel('Y')
    view(2)
-   caxis(Solution,[0 1]);
+   %caxis(Solution,[0 1]);
    colorbar
    %subplot(Correction)
    %axis square

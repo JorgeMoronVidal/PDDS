@@ -3537,6 +3537,256 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
     MPI_Barrier(MPI_COMM_WORLD);
     //MPI_Finalize();
 }
+void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
+    bool done=true;
+    //double start = MPI_Wtime();
+    //FILE *pFile;
+    //if(myid==server) Print_Problem();
+    //Compute the PDDSparse Matrix
+    if(myid==server){
+        FILE *pFile;
+        pFile = fopen("Output/Debug/times.txt","a");
+        fprintf(pFile,"************Intermediate Step***********\n");
+        fclose(pFile);
+        //system("mv Output/solution.csv Output/solution_nvarred.csv");
+        //system("mv Output/Debug/B.csv Output/Debug/B_nvarred.csv");
+        //system("mv Output/Debug/G.csv Output/Debug/G_nvarred.csv");
+        //system("mv Output/Debug/B_CT.csv Output/Debug/B_CT_nvarred.csv");
+        //system("mv Output/Debug/G_CT.csv Output/Debug/G_CT_nvarred.csv");
+        //system("mv Output/Debug/B_var.csv Output/Debug/B_var_nvarred.csv");
+        //system("mv Output/Debug/G_var.csv Output/Debug/G_var_nvarred.csv");
+        T_vec_G.clear();T_vec_Gvar.clear(); T_vec_GCT.clear(); T_vec_B.clear();
+        T_vec_Bvar.clear(); T_vec_BCT.clear(); T_vec_APL.clear(); T_vec_times.clear();
+        T_vec_xi.clear(); T_vec_phi.clear(); T_vec_xixi.clear(); T_vec_phiphi.clear();
+        T_vec_phixi.clear(); T_vec_phip.clear(); T_vec_phiphip.clear(); T_vec_phipxi.clear();
+        T_vec_Estvar.clear(); T_vec_RNGCalls.clear(); T_vec_phi_trap.clear(); T_vec_phiphi_trap.clear();
+        T_vec_phi_trap_VR.clear();T_vec_phiphi_trap_VR.clear(); T_vec_bias_num.clear();
+        T_vec_bias_trap.clear();
+        G.clear(); G_CT.clear(); B.clear(); B_CT.clear(); G_var.clear(); B_var.clear();
+        APL.clear(); times.clear(); xi.clear(); phi.clear(); xixi.clear(); phiphi.clear();
+        phixi.clear(); phip.clear(); phiphip.clear(); phipxi.clear(); Est_var.clear();
+        RNGCalls.clear(); PCoeff_o.clear(); PCoeff_n.clear(); phi_trap.clear(); phiphi_trap.clear();
+        phi_trap_VR.clear(); phiphi_trap_VR.clear(); var_phi_trap.clear();var_phi_trap_VR.clear();
+        G_j.clear(); G_i.clear(); B_i.clear(); bias_num.clear(); bias_trap.clear();
+        char order[256];
+        sprintf(order,"cp -r Output Output_%d",iteration);
+        system(order);
+        pFile = fopen("Output/Debug/times.txt","a");
+        fprintf(pFile,"************Solving with VR***********\n");
+        fclose(pFile);
+        std::vector<int> aux_vec;
+        std::vector<Eigen::Vector2d> positions;
+        std::vector<int> indexes;
+        aux_vec.resize(2);
+        for(int Iy = 0; Iy <= 2*iN[1]-2; Iy ++){
+            if(Iy%2 == 0){
+                for(int Ix = 0; Ix <= iN[0]-2; Ix ++){
+                    aux_vec[0] = Ix;
+                    aux_vec[1] = Iy;
+                    if(Iy == 0){
+                        indexes.assign(interfaces[interface_map[aux_vec]].index.begin(),
+                        interfaces[interface_map[aux_vec]].index.end());
+                        positions.assign(interfaces[interface_map[aux_vec]].position.begin(),
+                        interfaces[interface_map[aux_vec]].position.end());
+                    } else {
+                        indexes.assign(interfaces[interface_map[aux_vec]].index.begin()+1,
+                        interfaces[interface_map[aux_vec]].index.end());
+                        positions.assign(interfaces[interface_map[aux_vec]].position.begin()+1,
+                        interfaces[interface_map[aux_vec]].position.end());
+                    }
+                    std::cout << "Sending interface [" << aux_vec[0] << ","<< aux_vec[1] << "]"<< std::endl;
+                    Send_Interface(positions, indexes);
+                    //Send_Stencil_Data(indexes[0]);
+                    std::cout << "Interface [" << aux_vec[0] << ","<< aux_vec[1] << "] sent"<< std::endl;
+                }
+            } else {
+                for(int Ix = 0; Ix <= iN[0]-1; Ix ++){
+                    aux_vec[0] = Ix;
+                    aux_vec[1] = Iy;
+                    if(Ix == 0){
+                        indexes.assign(interfaces[interface_map[aux_vec]].index.begin(),
+                        interfaces[interface_map[aux_vec]].index.end()-1);
+                        positions.assign(interfaces[interface_map[aux_vec]].position.begin(),
+                        interfaces[interface_map[aux_vec]].position.end()-1);
+                    } else {
+                        if(Ix == iN[0]-1){
+                            indexes.assign(interfaces[interface_map[aux_vec]].index.begin()+1,
+                            interfaces[interface_map[aux_vec]].index.end());
+                            positions.assign(interfaces[interface_map[aux_vec]].position.begin()+1,
+                            interfaces[interface_map[aux_vec]].position.end());
+                        }else{
+                            indexes.assign(interfaces[interface_map[aux_vec]].index.begin()+1,
+                            interfaces[interface_map[aux_vec]].index.end()-1);
+                            positions.assign(interfaces[interface_map[aux_vec]].position.begin()+1,
+                            interfaces[interface_map[aux_vec]].position.end()-1);
+                        }
+                    }
+                    std::cout << "Sending interface [" << aux_vec[0] << ","<< aux_vec[1] << "]"<< std::endl;
+                    Send_Interface(positions, indexes);
+                    //Send_Stencil_Data(indexes[0]);
+                    std::cout << "Interface [" << aux_vec[0] << ","<< aux_vec[1] << "] sent"<< std::endl;
+                }
+                
+            }
+        }
+        Update_TimeFile("MC Simulations VR",server+1);
+        //G and B are received from the workers
+        #ifdef LOCAL_SERVERS
+        #else
+        for(int process = 0; process < server; process++){
+             Receive_G_B();
+             Receive_Metadata();
+        }
+        Update_TimeFile("Receiving G and B VR",server+1);
+        #endif
+        //Compute_B_Deterministic();
+        Compute_Solution(Lin_BVP);
+        //pFile = fopen(debug_fname,"a");
+        //double end = MPI_Wtime();
+        Process_Metadata();
+        B.clear();
+        B_i.clear();
+        //Compute_B_Deterministic();
+        //Compute_Solution_2(bvp);
+        //double end = MPI_Wtime();
+        T_vec_G.clear();T_vec_Gvar.clear(); T_vec_GCT.clear(); T_vec_B.clear();
+        T_vec_Bvar.clear(); T_vec_BCT.clear(); T_vec_APL.clear(); T_vec_times.clear();
+        T_vec_xi.clear(); T_vec_phi.clear(); T_vec_xixi.clear(); T_vec_phiphi.clear();
+        T_vec_phixi.clear(); T_vec_phip.clear(); T_vec_phiphip.clear(); T_vec_phipxi.clear();
+        T_vec_Estvar.clear(); T_vec_RNGCalls.clear(); T_vec_phi_trap.clear(); T_vec_phiphi_trap.clear();
+        T_vec_phi_trap_VR.clear();T_vec_phiphi_trap_VR.clear();  T_vec_bias_num.clear();
+        T_vec_bias_trap.clear();
+        G.clear(); G_CT.clear(); B.clear(); B_CT.clear(); G_var.clear(); B_var.clear();
+        APL.clear(); times.clear(); xi.clear(); phi.clear(); xixi.clear(); phiphi.clear();
+        phixi.clear(); phip.clear(); phiphip.clear(); phipxi.clear(); Est_var.clear();
+        RNGCalls.clear(); PCoeff_o.clear(); PCoeff_n.clear(); phi_trap.clear(); phiphi_trap.clear();
+        phi_trap_VR.clear(); phiphi_trap_VR.clear(); var_phi_trap.clear();var_phi_trap_VR.clear();
+        bias_num.clear(); bias_trap.clear();G_j.clear(); G_i.clear(); B_i.clear();
+    } else {
+        //Start and end time for the node
+        //G and B storage vectors for each node
+        double B_temp, BB_temp;
+        std::vector<double> G_temp, G_var_temp, x, y, x_LUT,y_LUT,u_LUT,v_LUT;
+        double *array_x, *array_y, *array_u, *array_v;
+        std::vector<int>  G_j_temp, indexes;
+        Eigen::Vector2d X0;
+        //Stencil
+        Stencil stencil;
+        EMFKACSolver solver;
+        //spline. The v's are u0s 
+        gsl_spline2d *LUT_u, *LUT_v;
+        gsl_interp_accel *xacc_u, *yacc_u, *xacc_v, *yacc_v;
+        c2 = pow(fac*(1.0/(nN[0]-1)),2.0);
+        G_i.clear();G_j.clear(); G.clear(); G_CT.clear(); G_var.clear();
+        B.clear();B_CT.clear();B_i.clear();B_var.clear(); times.clear();
+        G.clear(); G_CT.clear(); B.clear(); B_CT.clear(); G_var.clear(); B_var.clear();
+        APL.clear(); times.clear(); xi.clear(); phi.clear(); xixi.clear(); phiphi.clear();
+        phixi.clear(); phip.clear(); phiphip.clear(); phipxi.clear(); Est_var.clear();
+        RNGCalls.clear(); PCoeff_o.clear(); bias_num.clear(); bias_trap.clear();
+        PCoeff_n.clear(); phi_trap.clear(); phiphi_trap.clear();
+        //printf("Intermediate Step\n");
+        while(! Receive_Interface(x,y,indexes)){
+            //stencil.Print(indexes[0]);
+            std::cout << "Interface received"<< std::endl;
+            for(unsigned int knot = 0; knot < x.size(); knot ++){
+                //knot_start = MPI_Wtime();
+                stencil = Compute_Stencil(indexes[knot]);
+                stencil.Compute_ipsi(Lin_BVP,c2,debug_fname);
+                for(int i = 0; i < 4; i++) stencil.global_parameters[i] = parameters[i];
+                Set_LUT_FILE_Solution(indexes[knot],x_LUT,y_LUT,u_LUT);
+                std::cout << "Solving knot " << indexes[knot] << std::endl;
+                array_x = new double[x_LUT.size()];for(unsigned int i = 0; i < x_LUT.size(); i++){
+                    array_x[i] = x_LUT[i];
+                    //std::cout << array_x[i] << std::endl;
+                }
+                //std::cout << "y\n";
+                array_y = new double[y_LUT.size()];for(unsigned int i = 0; i < y_LUT.size(); i++){
+                    array_y[i] = y_LUT[i];
+                    //std::cout << array_y[i] << std::endl;
+                } 
+                array_u = new double[u_LUT.size()];for(unsigned int i = 0; i < u_LUT.size(); i++) array_u[i] = u_LUT[i];
+                LUT_u = gsl_spline2d_alloc(gsl_interp2d_bicubic, x_LUT.size(), y_LUT.size());
+                xacc_u = gsl_interp_accel_alloc();
+                yacc_u = gsl_interp_accel_alloc();
+                gsl_spline2d_init(LUT_u, array_x, array_y, array_u, x_LUT.size(), y_LUT.size());
+                Set_LUT_FILE_Correction(indexes[knot],x_LUT,y_LUT,v_LUT);
+                array_x = new double[x_LUT.size()];for(unsigned int i = 0; i < x_LUT.size(); i++) array_x[i] = x_LUT[i];
+                array_y = new double[y_LUT.size()];for(unsigned int i = 0; i < y_LUT.size(); i++) array_y[i] = y_LUT[i];
+                array_v = new double[v_LUT.size()];for(unsigned int i = 0; i < v_LUT.size(); i++) array_v[i] = v_LUT[i];
+                LUT_v = gsl_spline2d_alloc(gsl_interp2d_bicubic, x_LUT.size(), y_LUT.size());
+                xacc_v = gsl_interp_accel_alloc();
+                yacc_v = gsl_interp_accel_alloc();
+                gsl_spline2d_init(LUT_v, array_x, array_y, array_v, x_LUT.size(), y_LUT.size());
+                B_temp = 0.0;
+                BB_temp = 0.0;
+                G_j_temp.clear();
+                G_temp.clear();
+                G_var_temp.clear();
+                X0(0) = x[knot]; X0(1) = y[knot];
+                //printf("LUT defined in [%f %f], [%f %f]\n",array_x[0],array_y[0],array_x[x_LUT.size()-1],array_y[y_LUT.size()-1]);
+                //printf("Point [%f, %f]\n",X0(0),X0(1));
+                //std::cout << gsl_spline2d_eval(LUT,X0(0),X0(1),xacc,yacc) << std::endl;
+                stencil.Reset();
+                solver.Reset_sums();
+                solver.N = 0;
+                Eigen::Vector2d auxvec;
+                if(Lin_BVP.distance(stencil.stencil_parameters,X0,auxvec,auxvec) <= -1E-04){
+                    solver.Simulate_OMP_VR_Loop(X0,(unsigned int) N,h0, 0.1,
+                    Lin_BVP, stencil.stencil_parameters,LUT_u,xacc_u,yacc_u);
+                    solver.Reduce_Numeric(Lin_BVP,N,stencil,c2,G_temp,G_var_temp,
+                    G_j_temp, B_temp, BB_temp, LUT_u, xacc_u, yacc_u);
+                    B.push_back(B_temp);
+                    B_i.push_back(indexes[knot]);
+                    B_var.push_back(B_temp*B_temp - BB_temp);
+                    for(unsigned int k = 0;k < G_temp.size(); k ++){
+                        G_i.push_back(indexes[knot]);
+                        G_j.push_back(G_j_temp[k]);
+                        G.push_back(G_temp[k]);
+                        G_var.push_back(G_var_temp[k]);
+                    }
+                }else{
+                    B.push_back(Lin_BVP.g(X0,0.0));
+                    B_i.push_back(indexes[knot]);
+                    B_var.push_back(0.0);
+                }
+                delete array_x; delete array_y; delete array_u;
+                solver.Update();
+                //B.push_back(B_temp);
+                //B_CT.push_back(solver.B_CT);
+                //B_i.push_back(auxjob.index[0]);
+                //B_var.push_back(solver.var_B);
+                xi.push_back(solver.xi_num);
+                phi.push_back(solver.phi_num);
+                xixi.push_back(solver.xixi_num);
+                phiphi.push_back(solver.phiphi_num);
+                phixi.push_back(solver.xiphi_num);
+                phip.push_back(solver.phi_sublinear_num);
+                phiphip.push_back(solver.phiphi_sublinear_num);
+                phipxi.push_back(solver.xiphi_sublinear_num);
+                APL.push_back(solver.APL);
+                Est_var.push_back(solver.phiphi_num-solver.phi_num*solver.phi_num);
+                RNGCalls.push_back((double)solver.RNGC);
+                phi_trap.push_back(solver.phi);
+                //std::cout << "Index " << indexes[knot] << "\t FKAC num sol " << solver.phi_num << "\t FKAC sol" << solver.phi << "\n";
+                phiphi_trap.push_back(solver.phiphi);
+                phi_trap_VR.push_back(solver.phi+solver.xi);
+                phiphi_trap_VR.push_back(pow(solver.phi+solver.xi,2.0));
+                bias_num.push_back(solver.phi_sublinear_num - solver.phi_num); 
+                bias_trap.push_back(solver.phi_sublinear - solver.phi); 
+                //knot_end = MPI_Wtime();
+                //times.push_back((knot_end-knot_start));
+                //knot_end = MPI_Wtime();
+                
+            }
+        }
+        Send_G_B();
+        Send_Metadata(server);
+        //Compute_B_Deterministic();
+        //double end = MPI_Wtime();
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Finalize();
+}
 /*
 void PDDSparseGM::Compute_h_N(bvp BoundValProb, double eps, std::vector<double> & h_vec, std::vector<int> & N_vec){
     if(myid==server){

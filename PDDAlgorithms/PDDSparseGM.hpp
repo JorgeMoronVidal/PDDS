@@ -255,8 +255,10 @@ class PDDSparseGM{
        void Solve_SemiLin(int iteration, bvp Lin_BVP); 
        /*Solves Subdomains of a Semilinear problem*/
        void Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb);
-       /*Intermediate Step*/
+       /*Solves semilinear equation with Variance Reduction*/
        void Solve_SemiLin_numVR(int iteration, bvp Lin_BVP);
+       /*Solves a linear BVP with the iterative algorithm*/
+        void Solve_Iterative_numVR(int iteration, bvp Lin_BVP);
        /*Computes the optimal h and N given a bias and variance estimation*/
        //void Compute_h_N(bvp BoundValProb, double eps, std::vector<double> & h, std::vector<int> & N);
        /*Solves with numerical Variance Reduction after a warm-up fase*/
