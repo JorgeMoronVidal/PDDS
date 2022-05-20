@@ -22,9 +22,10 @@ for l = 1:length(Iterations)
   c_axis = [0,0];
   error_cmap = flip(gray);
   MSE = 0;
-  MSE_0 = 0;
-  RES = 0;
-  CORR = 0;
+  ERR = [];
+  %MSE_0 = 0;
+  %RES = 0;
+  %CORR = 0;
   for i=1:r
       label = labels(i,:);
       filename = sprintf("%s/Subdomains/X_%s",Iterations(l).name,labels(i,:));
@@ -35,8 +36,8 @@ for l = 1:length(Iterations)
       len_y = length(y);
       filename = sprintf("%s/Subdomains/Sol_%s",Iterations(l).name,labels(i,:));
       u = load(filename,'-ascii');
-      %filename = sprintf("%s/Subdomains/Correction_%s",Iterations(l).name,labels(i,:));
-      v = zeros(size(u));
+      filename = sprintf("%s/Subdomains/Correction_%s",Iterations(l).name,labels(i,:));
+      v = load(filename,'-ascii');
       [xx,yy] = meshgrid(x,y);
       uu = reshape(u,len_x,len_y)';
       vv = reshape(v,len_x,len_y)';
@@ -59,10 +60,9 @@ for l = 1:length(Iterations)
       end
       s = surf(xx,yy,abs(err));
       s.EdgeColor = 'none';
+      ERR = [ERR;err(:)];
       MSE = MSE + (1.0/r)*mean(err(:).^2);
-      MSE_0 = MSE_0 + (1.0/r)*mean(uu_a(:).^2);
-      RES = RES + (1.0/r)*mean(((v(:).^2).*(3*u(:)-2*v)).^2);
-      CORR = CORR + (1.0/r)*mean(v(:).^2);
+      %MSE_0 = MSE_0 + (1.0/r)*mean(uu_a(:).^2);
   end
    subplot(Solution)
    axis square
@@ -75,7 +75,7 @@ for l = 1:length(Iterations)
    colorbar
    %subplot(Correction)
    %axis square
-   %title('Correction')
+   %title('Solution step 0')
    %set(gca,'FontSize',16)
    %colorbar
    %view(2)
@@ -87,5 +87,5 @@ for l = 1:length(Iterations)
    ylabel('Y')
    colorbar
    view(2)
-   disp(sqrt(MSE));
+   disp(norm(ERR));
 end

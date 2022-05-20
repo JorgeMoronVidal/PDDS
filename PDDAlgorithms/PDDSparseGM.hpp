@@ -255,6 +255,10 @@ class PDDSparseGM{
        void Solve_SemiLin(int iteration, bvp Lin_BVP); 
        /*Solves Subdomains of a Semilinear problem*/
        void Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb);
+       /*Solves Subdomains in the first iteration of a linear problem iterative solver*/
+       void Solve_Subdomains_LinIt_First(bvp BoundValProb);
+       /*Solves Subdomains in the not-first iterations of a linear problem iterative solver*/
+       void Solve_Subdomains_LinIt(bvp BoundValProb);
        /*Solves semilinear equation with Variance Reduction*/
        void Solve_SemiLin_numVR(int iteration, bvp Lin_BVP);
        /*Solves a linear BVP with the iterative algorithm*/

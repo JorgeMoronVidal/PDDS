@@ -41,6 +41,8 @@ class Subdomain{
     void Solve(MPI_Comm & world);
     //Solves the linearised BVP in the subdomain
     void Solve_NL(MPI_Comm & world);
+    void Solve_LinIt_First(MPI_Comm & world);
+    void Solve_LinIt(MPI_Comm & world);
     //Fullfills sol and correction with random numbers
     void Fullfill_Random(MPI_Comm & world, double constant);
     //Sends the subdomain information to the worker

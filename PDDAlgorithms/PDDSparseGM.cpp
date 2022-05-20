@@ -3107,6 +3107,70 @@ void PDDSparseGM::Solve_Subdomains(bvp BoundValProb){
     }
     //MPI_Finalize();
 }
+void PDDSparseGM::Solve_Subdomains_LinIt_First(bvp BoundValProb){
+    if(myid == server){
+        Read_Solution();
+        Fullfill_subdomains(BoundValProb);
+        Update_TimeFile("Fullfilling subdomains",1);
+        for(std::vector<Subdomain>::iterator it_subdomain = subdomains.begin();
+            it_subdomain != subdomains.end();
+            it_subdomain ++){
+            MPI_Recv(work_control, 2, MPI_INT, MPI_ANY_SOURCE, ASK_SERVER, world, &status);
+            work_control[0] = SEND_WORK;
+            MPI_Send(work_control, 2, MPI_INT, status.MPI_SOURCE, REPLY_WORKER, world);
+            (*it_subdomain).Send_To_Worker(status,world);
+        }
+        for(int i = 0; i<server; i++){
+            MPI_Recv(work_control, 2, MPI_INT, MPI_ANY_SOURCE, ASK_SERVER, world, &status);
+            work_control[0] = END_WORKER;
+            MPI_Send(work_control, 2, MPI_INT, status.MPI_SOURCE, REPLY_WORKER, world);
+        }
+        Update_TimeFile("Solving subdomains",server+1);
+    } else {
+        Subdomain subdomain;
+        do{
+            MPI_Send(work_control, 2, MPI_INT, server, ASK_SERVER, world);
+            MPI_Recv(work_control, 2, MPI_INT, server, REPLY_WORKER, world, &status);
+            if(work_control[0] == SEND_WORK){
+                subdomain.Recieve_From_Server(server, world);
+                subdomain.Solve_LinIt_First(world);
+            }
+        }while(work_control[0] == SEND_WORK);
+    }
+    //MPI_Finalize();
+}
+void PDDSparseGM::Solve_Subdomains_LinIt(bvp BoundValProb){
+    if(myid == server){
+        Read_Solution();
+        Fullfill_subdomains(BoundValProb);
+        Update_TimeFile("Fullfilling subdomains",1);
+        for(std::vector<Subdomain>::iterator it_subdomain = subdomains.begin();
+            it_subdomain != subdomains.end();
+            it_subdomain ++){
+            MPI_Recv(work_control, 2, MPI_INT, MPI_ANY_SOURCE, ASK_SERVER, world, &status);
+            work_control[0] = SEND_WORK;
+            MPI_Send(work_control, 2, MPI_INT, status.MPI_SOURCE, REPLY_WORKER, world);
+            (*it_subdomain).Send_To_Worker(status,world);
+        }
+        for(int i = 0; i<server; i++){
+            MPI_Recv(work_control, 2, MPI_INT, MPI_ANY_SOURCE, ASK_SERVER, world, &status);
+            work_control[0] = END_WORKER;
+            MPI_Send(work_control, 2, MPI_INT, status.MPI_SOURCE, REPLY_WORKER, world);
+        }
+        Update_TimeFile("Solving subdomains",server+1);
+    } else {
+        Subdomain subdomain;
+        do{
+            MPI_Send(work_control, 2, MPI_INT, server, ASK_SERVER, world);
+            MPI_Recv(work_control, 2, MPI_INT, server, REPLY_WORKER, world, &status);
+            if(work_control[0] == SEND_WORK){
+                subdomain.Recieve_From_Server(server, world);
+                subdomain.Solve_LinIt(world);
+            }
+        }while(work_control[0] == SEND_WORK);
+    }
+    //MPI_Finalize();
+}
 void PDDSparseGM::Solve_Subdomains_SemiLin(int iteration, bvp BoundValProb){
     if(myid == server){
         Read_Solution();
@@ -3731,8 +3795,9 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
                 solver.N = 0;
                 Eigen::Vector2d auxvec;
                 if(Lin_BVP.distance(stencil.stencil_parameters,X0,auxvec,auxvec) <= -1E-04){
-                    solver.Simulate_OMP_VR_Loop(X0,(unsigned int) N,h0, 0.1,
-                    Lin_BVP, stencil.stencil_parameters,LUT_u,xacc_u,yacc_u);
+                    solver.Simulate_OMP(X0,(unsigned int) N,h0, 0.1,
+                    Lin_BVP, stencil.stencil_parameters,LUT_u,xacc_u,
+                    yacc_u,LUT_v,xacc_v, yacc_v);
                     solver.Reduce_Numeric(Lin_BVP,N,stencil,c2,G_temp,G_var_temp,
                     G_j_temp, B_temp, BB_temp, LUT_u, xacc_u, yacc_u);
                     B.push_back(B_temp);
