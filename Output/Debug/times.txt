@@ -1,43 +1,4 @@
 task,total_tike,task_time,N_process
-Reading configuration File,1.904293e-04,1.901406e-04,5
-Fullfilling interfaces,5.178189e-04,3.273896e-04,1
+Reading configuration File,8.507636e-04,8.498926e-04,5
+Fullfilling interfaces,1.761829e-02,1.676753e-02,1
 ************WARMING UP***********
-MC Simulations,2.030576e-03,1.512758e-03,5
-Receiving G and B,4.439605e+02,4.439584e+02,5
-Fullfilling subdomains,4.440062e+02,4.576748e-02,1
-Solving subdomains,4.444002e+02,3.939710e-01,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,4.444279e+02,2.770567e-02,5
-Receiving G and B VR,9.009117e+02,4.564838e+02,5
-Fullfilling subdomains,9.009578e+02,4.612493e-02,1
-Solving subdomains,9.013603e+02,4.024639e-01,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,9.013712e+02,1.091385e-02,5
-Receiving G and B VR,1.356893e+03,4.555219e+02,5
-Fullfilling subdomains,1.356943e+03,4.988716e-02,1
-Solving subdomains,1.357395e+03,4.518561e-01,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,1.357409e+03,1.380940e-02,5
-Receiving G and B VR,1.822033e+03,4.646246e+02,5
-Fullfilling subdomains,1.822076e+03,4.303258e-02,1
-Solving subdomains,1.822415e+03,3.389585e-01,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,1.822427e+03,1.179531e-02,5
-Receiving G and B VR,2.280738e+03,4.583113e+02,5
-Fullfilling subdomains,2.280784e+03,4.527412e-02,1
-Solving subdomains,2.281167e+03,3.828483e-01,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,2.281177e+03,1.002528e-02,5
-Receiving G and B VR,2.723830e+03,4.426536e+02,5
-Fullfilling subdomains,2.723871e+03,4.061339e-02,1
-Solving subdomains,2.724191e+03,3.202017e-01,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,2.724200e+03,8.811572e-03,5
-Receiving G and B VR,3.163576e+03,4.393761e+02,5
-Fullfilling subdomains,3.163615e+03,3.922980e-02,1

@@ -28,7 +28,7 @@ class Stencil
         uint32_t counter_north, counter_south, counter_east, counter_west;
         //Computes the inverse matrix of the psi matrix
         double c2_north, c2_south, c2_east, c2_west;
-        Eigen::MatrixXd Compute_ipsi(std::vector<Eigen::Vector2d> & sten_position, bvp boundvalprob, double c2, char debug_fname[256]);
+        Eigen::MatrixXd Compute_ipsi(std::vector<Eigen::Vector2d> & sten_position, bvp boundvalprob, double & c2, char debug_fname[256]);
        
     public:
         //Parameters of the stencil boundary
