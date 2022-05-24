@@ -1,1 +1,8 @@
-nNodes is 2512
+nNodes is 37
+Processor 1828540 ended sending its contribution to G and B
+Processor 1828540 ended sending its contribution to G and B
+Processor 1828540 ended sending its contribution to G and B
+Processor 1828540 ended sending its contribution to G and B
+Processor 1828540 ended sending its contribution to G and B
+Processor 1828540 ended sending its contribution to G and B
+Processor 1828540 ended sending its contribution to G and B

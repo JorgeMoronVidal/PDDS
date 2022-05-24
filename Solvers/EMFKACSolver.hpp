@@ -37,7 +37,8 @@ enum sumindex
     XiScoreSublinearNum = 23,
     tauLinear = 24,
     tauSublinear= 25,
-    RNGCalls = 26
+    RNGCalls = 26,
+    AvPathLen = 27
 };
 class EMFKACSolver{
 private:
@@ -245,7 +246,7 @@ public:
                 Z = 0;
                 xi = 0;
                 ji_t = 0;
-                t = INFINITY;
+                t = 0.0;
                 RNGCalls_thread = 0;
                 dist = BoundaryValueProblem.distance(boundary_parameters,X,
                 normal_proyection,normal);
@@ -293,7 +294,7 @@ public:
                 X_tau_lin[n] = normal_proyection;
                 Y_tau_lin[n] = Y;
                 Z_tau_lin[n] = Z;
-                tau_lin[n] = t;
+                tau_lin[n] = (-1.0)*t;
                 xi_lin[n] = xi;
                 do{
                         Step(X,normal,Y,Z,xi,t,ji_t,h,sqrth,RNG[id],normal_dist[id],
@@ -311,7 +312,7 @@ public:
                 X_tau_sublin[n] = normal_proyection;
                 Y_tau_sublin[n] = Y;
                 Z_tau_sublin[n] = Z;
-                tau_sublin[n] = t;
+                tau_sublin[n] = (-1.0)*t;
                 xi_sublin[n] = xi;
                 RNGcallsv[n] = RNGCalls_thread;
             }
@@ -356,7 +357,7 @@ public:
                 Z = 0;
                 xi = 0;
                 ji_t = 0;
-                t = INFINITY;
+                t = 0;
                 RNGCalls_thread = 0;
                 dist = BoundaryValueProblem.distance(boundary_parameters,X,
                 normal_proyection,normal);
@@ -402,7 +403,7 @@ public:
                 X_tau_lin[n] = normal_proyection;
                 Y_tau_lin[n] = Y;
                 Z_tau_lin[n] = Z;
-                tau_lin[n] = t;
+                tau_lin[n] = (-1.0)*t;
                 xi_lin[n] = xi;
                 do{
                         Step(X,normal,Y,Z,xi,t,ji_t,h,sqrth,RNG[id],normal_dist[id],
@@ -420,7 +421,7 @@ public:
                 X_tau_sublin[n] = normal_proyection;
                 Y_tau_sublin[n] = Y;
                 Z_tau_sublin[n] = Z;
-                tau_sublin[n] = t;
+                tau_sublin[n] = (-1.0)*t;
                 xi_sublin[n] = xi;
                 RNGcallsv[n] = RNGCalls_thread;
             }
@@ -549,8 +550,8 @@ public:
                     score_sublinear_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.u(X_tau_sublin[n],tau_sublin[n]);
                     score_linear_vr_thread = score_linear_nvr_thread + xi_lin[n];
                     score_sublinear_vr_thread = score_sublinear_nvr_thread + xi_sublin[n];
-                    score_linear_num_nvr_thread = Z_tau_lin[n] + Y_tau_lin[n]*BoundaryValueProblem.u(X_tau_lin[n],tau_lin[n]);//*BoundaryValueProblem.num_u(X_tau_lin[n],tau_lin[n],LUT_u,xacc_u,yacc_u);
-                    score_sublinear_num_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.u(X_tau_lin[n],tau_lin[n]);//*BoundaryValueProblem.num_u(X_tau_sublin[n],tau_sublin[n],LUT_u,xacc_u,yacc_u);
+                    score_linear_num_nvr_thread = Z_tau_lin[n] + Y_tau_lin[n]*BoundaryValueProblem.num_u(X_tau_lin[n],tau_lin[n],LUT_u,xacc_u,yacc_u);
+                    score_sublinear_num_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.num_u(X_tau_sublin[n],tau_sublin[n],LUT_u,xacc_u,yacc_u);
                     score_linear_num_vr_thread = score_linear_nvr_thread + xi_lin[n];
                     score_sublinear_num_vr_thread = score_sublinear_nvr_thread + xi_sublin[n];
                     sums[ScoreLinear] += score_linear_nvr_thread;
@@ -570,6 +571,8 @@ public:
                     sums[XiLinearNum2] += xi_lin[n]*xi_lin[n];
                     sums[XiSublinearNum2] += xi_sublin[n]*xi_sublin[n];
                     sums[ScoreLinearVR] += score_linear_nvr_thread + xi_lin[n];
+                    sums[ScoreLinearVRNum] += score_linear_num_vr_thread;
+                    sums[ScoreLinearVRNum2] += score_linear_num_vr_thread*score_linear_num_vr_thread;
                     sums[ScoreSublinearVR] += score_sublinear_nvr_thread + xi_sublin[n];
                     sums[ScoreLinearVR2] += pow(score_linear_nvr_thread + xi_lin[n],2);
                     sums[ScoreSublinearVR2] += pow(score_sublinear_nvr_thread + xi_sublin[n],2);

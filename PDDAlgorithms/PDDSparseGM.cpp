@@ -2371,6 +2371,9 @@ void PDDSparseGM::Send_Metadata(int aux_server){
     for(int i = 0; i < work_control[1]; i++) double_aux[i] = bias_trap[i];
     MPI_Send(double_aux, work_control[1], MPI_DOUBLE, aux_server, TAG_bias_trap, world);
     bias_trap.clear();
+    for(int i = 0; i < work_control[1]; i++)double_aux[i] = Est_var_VR[i];
+    MPI_Send(double_aux, work_control[1], MPI_DOUBLE, aux_server, TAG_Estvar_VR, world);
+    Est_var_VR.clear();
     delete double_aux;
 }
 void PDDSparseGM::Receive_G_B(void){
@@ -2612,6 +2615,11 @@ void PDDSparseGM::Receive_Metadata(void){
     for(int j = 0; j < work_control[1]; j++){
         T_vec_bias_trap.push_back(T(B_i[j], 0, double_aux[j]));
     }
+    MPI_Recv(double_aux, work_control[1], MPI_DOUBLE, status.MPI_SOURCE, TAG_Estvar_VR, world, &status);
+    for(int j = 0; j < work_control[1]; j++){
+        T_vec_Estvar_VR.push_back(T(B_i[j], 0, double_aux[j]));
+        //std::cout << double_aux[j] << std::endl;
+    }
     delete double_aux;
     B_i.resize(0);
 }
@@ -2619,7 +2627,7 @@ void PDDSparseGM::Process_Metadata(void){
     Eigen::SparseMatrix<double> APL_sparse, times_sparse, Estvar_sparse, RNGCalls_sparse
     , phi_sparse, xi_sparse, xixi_sparse, phiphi_sparse, phixi_sparse, phip_sparse, phiphip_sparse,
     phipxi_sparse, PCoeff_sparse, phi_trap_sparse, phiphi_trap_sparse, phi_trap_VR_sparse, 
-    phiphi_trap_VR_sparse, bias_num_sparse, bias_trap_sparse;
+    phiphi_trap_VR_sparse, bias_num_sparse, bias_trap_sparse, Estvar_VR_sparse;
     unsigned int size = (unsigned int) nNodes;
     APL_sparse.resize(size, 1); times_sparse.resize(size, 1); Estvar_sparse.resize(size,1);
     PCoeff_sparse.resize(size,1); RNGCalls_sparse.resize(size,1);
@@ -2631,7 +2639,7 @@ void PDDSparseGM::Process_Metadata(void){
     phi_sparse.resize(size,1); xi_sparse.resize(size,1); xixi_sparse.resize(size,1);
     phiphi_sparse.resize(size,1); phixi_sparse.resize(size,1); phip_sparse.resize(size,1);
     phiphip_sparse.resize(size,1); phipxi_sparse.resize(size,1); bias_num_sparse.resize(size,1);
-    bias_trap_sparse.resize(size,1);
+    bias_trap_sparse.resize(size,1); Estvar_VR_sparse.resize(size,1);
     phi_sparse.setFromTriplets(T_vec_phi.begin(),T_vec_phi.end());
     xi_sparse.setFromTriplets(T_vec_xi.begin(),T_vec_xi.end());
     xixi_sparse.setFromTriplets(T_vec_xixi.begin(),T_vec_xixi.end());
@@ -2652,11 +2660,12 @@ void PDDSparseGM::Process_Metadata(void){
     phiphi_trap_sparse.setFromTriplets(T_vec_phiphi_trap.begin(),T_vec_phiphi_trap.end()); 
     phi_trap_VR_sparse.setFromTriplets(T_vec_phi_trap_VR.begin(),T_vec_phi_trap_VR.end());
     phiphi_trap_VR_sparse.setFromTriplets(T_vec_phiphi_trap_VR.begin(),T_vec_phiphi_trap_VR.end());
+    Estvar_VR_sparse.setFromTriplets(T_vec_Estvar_VR.begin(),T_vec_Estvar_VR.end());
     T_vec_phi_trap.clear(); T_vec_phiphi_trap.clear(); T_vec_phi_trap_VR.clear();
-    T_vec_phiphi_trap_VR.clear();
+    T_vec_phiphi_trap_VR.clear(); T_vec_Estvar_VR.clear();
     FILE *pf;
     pf = fopen("Output/Debug/knot_metadata.csv","w");
-    fprintf(pf,"index,APL,WCtime,RNGCalls,Estimated_Variance,PCoeff_old,PCoeff_new,Var_Plain,Var_VR,bias_num,bias_trap\n");
+    fprintf(pf,"index,APL,WCtime,RNGCalls,Estimated_Variance,Estimated_Variance_VR,PCoeff_old,PCoeff_new,Var_Plain,Var_VR,bias_num,bias_trap\n");
     Est_var.clear();
     PCoeff_o.clear();
     PCoeff_n.clear();
@@ -2670,9 +2679,9 @@ void PDDSparseGM::Process_Metadata(void){
         var_phi_trap.push_back(phiphi_trap_sparse.coeff(i,0)-pow(phi_trap_sparse.coeff(i,0),2));
         var_phi_trap_VR.push_back(phiphi_trap_VR_sparse.coeff(i,0)-pow(phi_trap_VR_sparse.coeff(i,0),2));
         bias_num.push_back(bias_num_sparse.coeff(i,0));
-        fprintf(pf,"%u,%e,%e,%e,%e,%e,%e,%e,%e,%e,%e\n",i
+        fprintf(pf,"%u,%e,%e,%e,%e,%e,%e,%e,%e,%e,%e,%e\n",i
         ,APL_sparse.coeff(i,0),times_sparse.coeff(i,0),RNGCalls_sparse.coeff(i,0),
-        Estvar_sparse.coeff(i,0),PCoeff_o[i],PCoeff_n[i],var_phi_trap[i],var_phi_trap_VR[i],
+        Estvar_sparse.coeff(i,0), Estvar_VR_sparse.coeff(i,0), PCoeff_o[i],PCoeff_n[i],var_phi_trap[i],var_phi_trap_VR[i],
         bias_num_sparse.coeff(i,0), bias_trap_sparse.coeff(i,0));
         
     }
@@ -3375,7 +3384,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         T_vec_phixi.clear(); T_vec_phip.clear(); T_vec_phiphip.clear(); T_vec_phipxi.clear();
         T_vec_Estvar.clear(); T_vec_RNGCalls.clear(); T_vec_phi_trap.clear(); T_vec_phiphi_trap.clear();
         T_vec_phi_trap_VR.clear();T_vec_phiphi_trap_VR.clear(); T_vec_bias_num.clear();
-        T_vec_bias_trap.clear();
+        T_vec_bias_trap.clear(); T_vec_Estvar_VR.clear();
         G.clear(); G_CT.clear(); B.clear(); B_CT.clear(); G_var.clear(); B_var.clear();
         APL.clear(); times.clear(); xi.clear(); phi.clear(); xixi.clear(); phiphi.clear();
         phixi.clear(); phip.clear(); phiphip.clear(); phipxi.clear(); Est_var.clear();
@@ -3719,7 +3728,7 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
         T_vec_phixi.clear(); T_vec_phip.clear(); T_vec_phiphip.clear(); T_vec_phipxi.clear();
         T_vec_Estvar.clear(); T_vec_RNGCalls.clear(); T_vec_phi_trap.clear(); T_vec_phiphi_trap.clear();
         T_vec_phi_trap_VR.clear();T_vec_phiphi_trap_VR.clear();  T_vec_bias_num.clear();
-        T_vec_bias_trap.clear();
+        T_vec_bias_trap.clear(); T_vec_Estvar_VR.clear();
         G.clear(); G_CT.clear(); B.clear(); B_CT.clear(); G_var.clear(); B_var.clear();
         APL.clear(); times.clear(); xi.clear(); phi.clear(); xixi.clear(); phiphi.clear();
         phixi.clear(); phip.clear(); phiphip.clear(); phipxi.clear(); Est_var.clear();
@@ -3747,7 +3756,7 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
         APL.clear(); times.clear(); xi.clear(); phi.clear(); xixi.clear(); phiphi.clear();
         phixi.clear(); phip.clear(); phiphip.clear(); phipxi.clear(); Est_var.clear();
         RNGCalls.clear(); PCoeff_o.clear(); bias_num.clear(); bias_trap.clear();
-        PCoeff_n.clear(); phi_trap.clear(); phiphi_trap.clear();
+        PCoeff_n.clear(); phi_trap.clear(); phiphi_trap.clear(); Est_var_VR.clear();
         //printf("Intermediate Step\n");
         while(! Receive_Interface(x,y,indexes)){
             //stencil.Print(indexes[0]);
@@ -3815,11 +3824,11 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
                     B_var.push_back(0.0);
                 }
                 delete array_x; delete array_y; delete array_u;
-                solver.Update();
                 //B.push_back(B_temp);
                 //B_CT.push_back(solver.B_CT);
                 //B_i.push_back(auxjob.index[0]);
                 //B_var.push_back(solver.var_B);
+                solver.Update();
                 xi.push_back(solver.xi_num);
                 phi.push_back(solver.phi_num);
                 xixi.push_back(solver.xixi_num);
@@ -3830,12 +3839,14 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
                 phipxi.push_back(solver.xiphi_sublinear_num);
                 APL.push_back(solver.APL);
                 Est_var.push_back(solver.phiphi_num-solver.phi_num*solver.phi_num);
+                Est_var_VR.push_back(solver.phiphi_VR_num-solver.phi_VR_num*solver.phi_VR_num);
+                //std::cout << solver.phiphi_VR_num << "\t" << solver.phi_VR_num*solver.phi_VR_num << std::endl;
                 RNGCalls.push_back((double)solver.RNGC);
                 phi_trap.push_back(solver.phi);
                 //std::cout << "Index " << indexes[knot] << "\t FKAC num sol " << solver.phi_num << "\t FKAC sol" << solver.phi << "\n";
                 phiphi_trap.push_back(solver.phiphi);
                 phi_trap_VR.push_back(solver.phi+solver.xi);
-                phiphi_trap_VR.push_back(pow(solver.phi+solver.xi,2.0));
+                phiphi_trap_VR.push_back(solver.phiphi_VR);
                 bias_num.push_back(solver.phi_sublinear_num - solver.phi_num); 
                 bias_trap.push_back(solver.phi_sublinear - solver.phi); 
                 //knot_end = MPI_Wtime();

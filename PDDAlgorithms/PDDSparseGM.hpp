@@ -54,6 +54,7 @@
 #define TAG_phiphi_trap_VR 49
 #define TAG_bias_num 50
 #define TAG_bias_trap 51
+#define TAG_Estvar_VR 52
 #define TODO_JOB_UINT  101
 #define TODO_JOB_INT  102
 #define TODO_JOB_DOUBLE 103
@@ -139,7 +140,7 @@ class PDDSparseGM{
        Eigen::Vector2d SW, NE;
        /*G and B storage vector*/
        std::vector<double> G, G_CT, B, B_CT, G_var, B_var, APL, times, xi, phi, xixi, phiphi,
-                           phixi, phip, phiphip, phipxi, Est_var, RNGCalls, PCoeff_o, PCoeff_n,
+                           phixi, phip, phiphip, phipxi, Est_var, Est_var_VR, RNGCalls, PCoeff_o, PCoeff_n,
                            phi_trap, phiphi_trap, phi_trap_VR, phiphi_trap_VR,var_phi_trap,
                            var_phi_trap_VR, bias_num, bias_trap;
        std::vector<int>  G_j, G_i, B_i;
@@ -148,7 +149,7 @@ class PDDSparseGM{
                       T_vec_APL, T_vec_times, T_vec_xi, T_vec_phi, T_vec_xixi, T_vec_phiphi,
                       T_vec_phixi, T_vec_phip, T_vec_phiphip, T_vec_phipxi, T_vec_Estvar,
                       T_vec_RNGCalls,T_vec_phi_trap,T_vec_phiphi_trap,T_vec_phi_trap_VR,
-                      T_vec_phiphi_trap_VR, T_vec_bias_num, T_vec_bias_trap;
+                      T_vec_phiphi_trap_VR, T_vec_bias_num, T_vec_bias_trap, T_vec_Estvar_VR;
         /*
           -N is the initial number of trayectories 
         */
@@ -262,7 +263,7 @@ class PDDSparseGM{
        /*Solves semilinear equation with Variance Reduction*/
        void Solve_SemiLin_numVR(int iteration, bvp Lin_BVP);
        /*Solves a linear BVP with the iterative algorithm*/
-        void Solve_Iterative_numVR(int iteration, bvp Lin_BVP);
+       void Solve_Iterative_numVR(int iteration, bvp Lin_BVP);
        /*Computes the optimal h and N given a bias and variance estimation*/
        //void Compute_h_N(bvp BoundValProb, double eps, std::vector<double> & h, std::vector<int> & N);
        /*Solves with numerical Variance Reduction after a warm-up fase*/
