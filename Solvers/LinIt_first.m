@@ -25,7 +25,7 @@
 args = argv();
 id = args{1};
 C2_iteration = 1.0;
-Alpha_iteration =3.0;
+Alpha_iteration =10.0;
 file = sprintf("Input/Interfaces/North_%s.txt", id);
 table = csvread(file);
 x_north = table(:,1);

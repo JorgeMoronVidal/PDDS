@@ -25,7 +25,7 @@
 args = argv();
 id = args{1};
 C2_iteration = 1.0;
-Alpha_iteration = 3.0;
+Alpha_iteration = 10.0;
 file = sprintf("Input/Interfaces/North_%s.txt", id);
 table = csvread(file);
 x_north = table(:,1);
@@ -71,13 +71,13 @@ uu_LUT = reshape(u_LUT,size(yy_LUT))';
 u0_LUT = reshape(u0_LUT,size(yy_LUT))';
 N = size(x_north)(1); [Dx,Dy,x,y] = cheb(N,x_north,y_west);
 [xx,yy] = meshgrid(x,y); xx = xx(:); yy = yy(:);
-D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I) -Alpha_iteration*eye(size(kron(I,D2x)));
+D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I) -(Alpha_iteration-C2_iteration)*eye(size(kron(I,D2x)));
 %Impose boundary conditions and -f function by replacing appropriate rows of L:
 b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
 L(b,:) = zeros(4*N,(N+1)^2); 
 L(b,b) = eye(4*N);
-rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) +C2_iteration*(ones(size(xx))+sin(pi*xx).*sin(pi*yy))-C2_iteration*u0_LUT(:) - Alpha_iteration*uu_LUT(:);
+rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) +C2_iteration*(ones(size(xx))+sin(pi*xx).*sin(pi*yy)) - Alpha_iteration*uu_LUT(:);%-C2_iteration*u0_LUT(:);
 %rhs(b) = sin(omegax*pi*xx(b) + omegay*pi*yy(b)) + cos(omegapx*pi*xx(b) + omegapy*pi*yy(b));
 b_west = find(xx==x_west(1));
 rhs(b_west) = interp1(y_west,sol_west, yy(b_west),'spline');

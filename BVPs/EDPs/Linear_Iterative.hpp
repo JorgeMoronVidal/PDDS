@@ -6,7 +6,7 @@
 #include <gsl/gsl_spline2d.h>
 #include <gsl/gsl_errno.h>
 #define C2_iteration 1.0
-#define Alpha_iteration 3.0
+#define Alpha_iteration 10.0
 //#include "../LUT.hpp"
 inline double EquationLI_u(Eigen::Vector2d X, double t){
     return  1 + sin(M_PI*X(0))*sin(M_PI*X(1));
@@ -26,7 +26,7 @@ inline double EquationLI_c_FirstIt(Eigen::Vector2d X, double t){
 }
 inline double EquationLI_c(Eigen::Vector2d X, double t,gsl_spline2d *LUT_ui, gsl_interp_accel *xacc_ui,
                 gsl_interp_accel *yacc_ui){
-    return  - Alpha_iteration;
+    return  C2_iteration - Alpha_iteration;
 }
 inline double EquationLI_f(Eigen::Vector2d X, double t){
     return +2*M_PI*M_PI*sin(M_PI*X(0))*sin(M_PI*X(1)) - C2_iteration*(1 + sin(M_PI*X(0))*sin(M_PI*X(1)));
@@ -34,8 +34,7 @@ inline double EquationLI_f(Eigen::Vector2d X, double t){
 inline double EquationLI_f_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT_ui, gsl_interp_accel *xacc_ui,
                 gsl_interp_accel *yacc_ui,gsl_spline2d *LUT_u0, gsl_interp_accel *xacc_u0,
                 gsl_interp_accel *yacc_u0){
-    return +2*M_PI*M_PI*sin(M_PI*X(0))*sin(M_PI*X(1)) - C2_iteration*(1 + sin(M_PI*X(0))*sin(M_PI*X(1))) +Alpha_iteration * gsl_spline2d_eval(LUT_ui, X(0), X(1), xacc_ui, yacc_ui)
-           +C2_iteration*gsl_spline2d_eval(LUT_u0, X(0), X(1), xacc_u0, yacc_u0);
+    return +2*M_PI*M_PI*sin(M_PI*X(0))*sin(M_PI*X(1)) - C2_iteration*(1 + sin(M_PI*X(0))*sin(M_PI*X(1))) +Alpha_iteration * gsl_spline2d_eval(LUT_ui, X(0), X(1), xacc_ui, yacc_ui);
 }
 inline double EquationLI_u_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT, gsl_interp_accel *xacc,
                 gsl_interp_accel *yacc){

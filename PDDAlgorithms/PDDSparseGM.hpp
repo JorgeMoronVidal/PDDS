@@ -2,7 +2,7 @@
 #ifndef PDDSPARSEGM
 #define PDDSPARSEGM
 //Fraction of the interface the stencil is elongated
-#define STEN_ELONG 0.1
+#define STEN_ELONG 0.5
 //Minimum value of N
 #define N_min 500
 //Minimum value of h
