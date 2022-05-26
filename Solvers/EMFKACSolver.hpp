@@ -246,7 +246,7 @@ public:
                 Z = 0;
                 xi = 0;
                 ji_t = 0;
-                t = 0.0;
+                t = INFINITY;
                 RNGCalls_thread = 0;
                 dist = BoundaryValueProblem.distance(boundary_parameters,X,
                 normal_proyection,normal);
@@ -294,7 +294,7 @@ public:
                 X_tau_lin[n] = normal_proyection;
                 Y_tau_lin[n] = Y;
                 Z_tau_lin[n] = Z;
-                tau_lin[n] = (-1.0)*t;
+                tau_lin[n] = t;
                 xi_lin[n] = xi;
                 do{
                         Step(X,normal,Y,Z,xi,t,ji_t,h,sqrth,RNG[id],normal_dist[id],
@@ -312,7 +312,7 @@ public:
                 X_tau_sublin[n] = normal_proyection;
                 Y_tau_sublin[n] = Y;
                 Z_tau_sublin[n] = Z;
-                tau_sublin[n] = (-1.0)*t;
+                tau_sublin[n] = t;
                 xi_sublin[n] = xi;
                 RNGcallsv[n] = RNGCalls_thread;
             }
@@ -357,7 +357,7 @@ public:
                 Z = 0;
                 xi = 0;
                 ji_t = 0;
-                t = 0;
+                t = INFINITY;
                 RNGCalls_thread = 0;
                 dist = BoundaryValueProblem.distance(boundary_parameters,X,
                 normal_proyection,normal);

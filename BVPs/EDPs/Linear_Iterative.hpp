@@ -39,7 +39,35 @@ inline double EquationLI_f_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT_ui,
 }
 inline double EquationLI_u_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT, gsl_interp_accel *xacc,
                 gsl_interp_accel *yacc){
-    return gsl_spline2d_eval(LUT, X(0), X(1), xacc, yacc);
+    int status;
+    status = gsl_spline2d_eval(LUT, X(0), X(1), xacc, yacc);
+    if(status){
+       status = gsl_spline2d_eval(LUT, X(0)-1E-03, X(1), xacc, yacc);
+       if(status){
+           status = gsl_spline2d_eval(LUT, X(0)+1E-03, X(1), xacc, yacc);
+           if(status){
+               status = gsl_spline2d_eval(LUT, X(0), X(1)-1E-03, xacc, yacc);
+               if(status){
+                   status = gsl_spline2d_eval(LUT, X(0), X(1)+1E-03, xacc, yacc);
+                   if(status){
+                       return 0.0;
+                       std::cout << "EquationLI_u_LUT if chain is not working properly\n";
+                   }else{
+                       return  gsl_spline2d_eval(LUT, X(0), X(1)+1E-03, xacc, yacc);
+                   }
+               }else{
+                   return gsl_spline2d_eval(LUT, X(0), X(1)-1E-03, xacc, yacc);
+               }
+           } else {
+               return gsl_spline2d_eval(LUT, X(0)+1E-03, X(1), xacc, yacc);
+           }
+       }else{
+           return gsl_spline2d_eval(LUT, X(0)-1E-03, X(1), xacc, yacc);
+       }
+    } else {
+        return gsl_spline2d_eval(LUT, X(0), X(1), xacc, yacc);
+    }
+    
 }
 inline double EquationLI_g(Eigen::Vector2d X, double t){
     return 1.0;

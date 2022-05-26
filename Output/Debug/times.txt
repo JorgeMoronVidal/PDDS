@@ -1,44 +1,44 @@
 task,total_tike,task_time,N_process
-Reading configuration File,1.914587e-04,1.911168e-04,5
-Fullfilling interfaces,3.849766e-04,1.935179e-04,1
+Reading configuration File,1.907132e-04,1.904296e-04,5
+Fullfilling interfaces,6.737577e-04,4.830445e-04,1
 ************WARMING UP***********
-MC Simulations,1.471603e-03,1.086626e-03,5
-Receiving G and B,1.184202e+01,1.184055e+01,5
-Fullfilling subdomains,1.184706e+01,5.040167e-03,1
-Solving subdomains,1.202563e+01,1.785686e-01,5
+MC Simulations,3.088656e+01,3.088588e+01,5
+Receiving G and B,4.230701e+01,1.142046e+01,5
+Fullfilling subdomains,4.233093e+01,2.391797e-02,1
+Solving subdomains,4.274906e+01,4.181315e-01,5
 ************Intermediate Step***********
 ************Solving with VR***********
-MC Simulations VR,1.203684e+01,1.121823e-02,5
-Receiving G and B VR,2.403449e+01,1.199765e+01,5
-Fullfilling subdomains,2.404104e+01,6.549655e-03,1
-Solving subdomains,2.422136e+01,1.803209e-01,5
+MC Simulations VR,7.517486e+01,3.242579e+01,5
+Receiving G and B VR,8.642337e+01,1.124851e+01,5
+Fullfilling subdomains,8.645273e+01,2.936062e-02,1
+Solving subdomains,8.690902e+01,4.562884e-01,5
 ************Intermediate Step***********
 ************Solving with VR***********
-MC Simulations VR,2.423488e+01,1.351564e-02,5
-Receiving G and B VR,4.040876e+01,1.617388e+01,5
-Fullfilling subdomains,4.041534e+01,6.579160e-03,1
-Solving subdomains,4.063387e+01,2.185343e-01,5
+MC Simulations VR,1.196805e+02,3.277151e+01,5
+Receiving G and B VR,1.309549e+02,1.127440e+01,5
+Fullfilling subdomains,1.309804e+02,2.546069e-02,1
+Solving subdomains,1.314199e+02,4.395305e-01,5
 ************Intermediate Step***********
 ************Solving with VR***********
-MC Simulations VR,4.065081e+01,1.693930e-02,5
-Receiving G and B VR,5.530280e+01,1.465199e+01,5
-Fullfilling subdomains,5.530910e+01,6.295823e-03,1
-Solving subdomains,5.548743e+01,1.783302e-01,5
+MC Simulations VR,1.640413e+02,3.262140e+01,5
+Receiving G and B VR,1.753096e+02,1.126830e+01,5
+Fullfilling subdomains,1.753374e+02,2.778226e-02,1
+Solving subdomains,1.757415e+02,4.041204e-01,5
 ************Intermediate Step***********
 ************Solving with VR***********
-MC Simulations VR,5.549959e+01,1.216020e-02,5
-Receiving G and B VR,6.832958e+01,1.282999e+01,5
-Fullfilling subdomains,6.833593e+01,6.344684e-03,1
-Solving subdomains,6.857087e+01,2.349431e-01,5
+MC Simulations VR,2.051989e+02,2.945738e+01,5
+Receiving G and B VR,2.172840e+02,1.208513e+01,5
+Fullfilling subdomains,2.173125e+02,2.851670e-02,1
+Solving subdomains,2.177372e+02,4.246944e-01,5
 ************Intermediate Step***********
 ************Solving with VR***********
-MC Simulations VR,6.858909e+01,1.821724e-02,5
-Receiving G and B VR,8.388339e+01,1.529430e+01,5
-Fullfilling subdomains,8.388944e+01,6.051175e-03,1
-Solving subdomains,8.406599e+01,1.765480e-01,5
+MC Simulations VR,2.478076e+02,3.007035e+01,5
+Receiving G and B VR,2.598386e+02,1.203106e+01,5
+Fullfilling subdomains,2.598686e+02,2.993453e-02,1
+Solving subdomains,2.603659e+02,4.973373e-01,5
 ************Intermediate Step***********
 ************Solving with VR***********
-MC Simulations VR,8.408260e+01,1.661080e-02,5
-Receiving G and B VR,9.810112e+01,1.401852e+01,5
-Fullfilling subdomains,9.810793e+01,6.815269e-03,1
-Solving subdomains,9.828864e+01,1.807114e-01,5
+MC Simulations VR,2.896842e+02,2.931829e+01,5
+Receiving G and B VR,3.016338e+02,1.194963e+01,5
+Fullfilling subdomains,3.016602e+02,2.639291e-02,1
+Solving subdomains,3.020612e+02,4.009211e-01,5

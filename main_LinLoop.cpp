@@ -3,6 +3,7 @@
 #include "PDDAlgorithms/PDDSparseGM.hpp"
 
 int main(int argc, char *argv[]){
+    gsl_set_error_handler_off();
     //BoundaryValueProblem Definition
     bvp boundvalprob;
     boundvalprob.u = EquationLI_u;
