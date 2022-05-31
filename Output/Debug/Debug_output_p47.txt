@@ -1,0 +1,8 @@
+nNodes is 1232
+Processor 32767 ended sending its contribution to G and B
+Processor 32767 ended sending its contribution to G and B
+Processor 32767 ended sending its contribution to G and B
+Processor 32767 ended sending its contribution to G and B
+Processor 32767 ended sending its contribution to G and B
+Processor 32767 ended sending its contribution to G and B
+Processor 32767 ended sending its contribution to G and B

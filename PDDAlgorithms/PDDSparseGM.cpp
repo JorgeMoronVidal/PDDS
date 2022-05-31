@@ -3488,7 +3488,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
     } else {
         //Start and end time for the node
         //G and B storage vectors for each node
-        double B_temp, BB_temp;
+        double B_temp, BB_temp, h_aux,distance;
         std::vector<double> G_temp, G_var_temp, x, y, x_LUT,y_LUT,u_LUT,v_LUT;
         double *array_x, *array_y, *array_u, *array_v;
         std::vector<int>  G_j_temp, indexes;
@@ -3552,9 +3552,13 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
                 stencil.Reset();
                 solver.Reset_sums();
                 solver.N = 0;
-                Eigen::Vector2d auxvec;
-                if(Lin_BVP.distance(stencil.stencil_parameters,X0,auxvec,auxvec) <= -1E-04){
-                    solver.Simulate_OMP_VR_Loop(X0,(unsigned int) N,h0, 0.1,
+                Eigen::Vector2d NP_aux, N_aux;
+                distance = Lin_BVP.distance(stencil.stencil_parameters,X0,NP_aux,N_aux);
+                if(distance <= -1E-04){
+                    h_aux = pow(distance/((N_aux.transpose()*Lin_BVP.sigma(X0,0.0)).norm()*2*0.5826),2.0);
+                    h_aux = std::min(h0,h_aux);
+                    std::cout << "H_aux = " << h_aux << std::endl;
+                    solver.Simulate_OMP_VR_Loop(X0,(unsigned int) N,h_aux, 0.1,
                     Lin_BVP, stencil.stencil_parameters,LUT_u,xacc_u,yacc_u);
                     solver.Reduce_Numeric(Lin_BVP,N,stencil,c2,G_temp,G_var_temp,
                     G_j_temp, B_temp, BB_temp, LUT_u, xacc_u, yacc_u);
@@ -3738,7 +3742,7 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
     } else {
         //Start and end time for the node
         //G and B storage vectors for each node
-        double B_temp, BB_temp;
+        double B_temp, BB_temp, distance, h_aux;
         std::vector<double> G_temp, G_var_temp, x, y, x_LUT,y_LUT,u_LUT,v_LUT;
         double *array_x, *array_y, *array_u, *array_v;
         std::vector<int>  G_j_temp, indexes;
@@ -3802,9 +3806,13 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
                 stencil.Reset();
                 solver.Reset_sums();
                 solver.N = 0;
-                Eigen::Vector2d auxvec;
-                if(Lin_BVP.distance(stencil.stencil_parameters,X0,auxvec,auxvec) <= -1E-04){
-                    solver.Simulate_OMP(X0,(unsigned int) N,h0, 0.1,
+                Eigen::Vector2d NP_aux, N_aux;
+                distance = Lin_BVP.distance(stencil.stencil_parameters,X0,NP_aux,N_aux);
+                if(distance <= -1E-04){
+                    h_aux = pow(distance/((N_aux.transpose()*Lin_BVP.sigma(X0,0.0)).norm()*2*0.5826),2.0);
+                    h_aux = std::min(h0,h_aux);
+                    std::cout << "H_aux = " << h_aux << std::endl;
+                    solver.Simulate_OMP(X0,(unsigned int) N,h_aux, 0.1,
                     Lin_BVP, stencil.stencil_parameters,LUT_u,xacc_u,
                     yacc_u,LUT_v,xacc_v, yacc_v);
                     solver.Reduce_Numeric(Lin_BVP,N,stencil,c2,G_temp,G_var_temp,

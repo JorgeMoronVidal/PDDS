@@ -24,8 +24,8 @@
 %Set up grid and 2D Laplacian, boundary points included:
 args = argv();
 id = args{1};
-C2_iteration = 1.0;
-Alpha_iteration =10.0;
+C2_iteration = 1;
+Alpha_iteration =3;
 file = sprintf("Input/Interfaces/North_%s.txt", id);
 table = csvread(file);
 x_north = table(:,1);
@@ -62,7 +62,8 @@ b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
 L(b,:) = zeros(4*N,(N+1)^2); 
 L(b,b) = eye(4*N);
-rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy)+C2_iteration*(ones(size(xx))+sin(pi*xx).*sin(pi*yy));%- 3*(ones(size(xx)) + sin(pi*xx).*sin(pi*yy));
+rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy)+C2_iteration*(0.0* ones(size(xx)) +sin(pi*xx).*sin(pi*yy));%- 3*(ones(size(xx)) + sin(pi*xx).*sin(pi*yy));
+%rhs = Monegros(xx,yy,'d2udx2') + Monegros(xx,yy,'d2udy2') +C2_iteration*(Monegros(xx,yy,'u'));
 %rhs(b) = sin(omegax*pi*xx(b) + omegay*pi*yy(b)) + cos(omegapx*pi*xx(b) + omegapy*pi*yy(b));
 b_west = find(xx==x_west(1));
 rhs(b_west) = interp1(y_west,sol_west, yy(b_west),'spline');
