@@ -77,7 +77,8 @@ b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
 L(b,:) = zeros(4*N,(N+1)^2); 
 L(b,b) = eye(4*N);
-rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) +C2_iteration*(0.0*ones(size(xx)) + sin(pi*xx).*sin(pi*yy)) - Alpha_iteration*uu_LUT(:);%-C2_iteration*u0_LUT(:);
+rhs = -(4*pi^2 +2*pi^4 - C2_iteration)*sin(2*pi*xx +0.5*ones(size(xx))).*cos((pi^2)*(xx+yy)) - (4*pi^3)*cos(2*pi*xx +0.5*ones(size(xx))).*sin((pi^2)*(xx+yy)) - Alpha_iteration*uu_LUT(:);
+%rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) +C2_iteration*(0.0*ones(size(xx)) + sin(pi*xx).*sin(pi*yy)) - Alpha_iteration*uu_LUT(:);%-C2_iteration*u0_LUT(:);
 %rhs = Monegros(xx,yy,'d2udx2') + Monegros(xx,yy,'d2udy2') +C2_iteration*(Monegros(xx,yy,'u'))- Alpha_iteration*uu_LUT(:);
 %rhs(b) = sin(omegax*pi*xx(b) + omegay*pi*yy(b)) + cos(omegapx*pi*xx(b) + omegapy*pi*yy(b));
 b_west = find(xx==x_west(1));
@@ -97,6 +98,9 @@ save("-ascii",file,"y")
 file = sprintf("Output/Subdomains/Sol_%s_%s.txt", args{2},args{3});
 u = (uu')(:);
 save("-ascii",file,"u")
+file = sprintf("Output/Subdomains/Correction_%s_%s.txt", args{2},args{3});
+v = ((uu-uu_LUT)')(:);
+save("-ascii",file,"v")
 %rhs(b_west) = interp1(y_west,sol_noisy_west, yy(b_west),'spline');
 %rhs(b_east) = interp1(y_east,sol_noisy_east, yy(b_east),'spline');
 %rhs(b_north) = interp1(x_north,sol_noisy_north, xx(b_north),'spline');

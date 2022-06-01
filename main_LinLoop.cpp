@@ -1,4 +1,4 @@
-#include "BVPs/EDPs/Linear_Iterative.hpp"
+#include "BVPs/EDPs/Salou_Iterative.hpp"
 #include "BVPs/Domains/rectangle.hpp"
 #include "PDDAlgorithms/PDDSparseGM.hpp"
 
@@ -28,11 +28,11 @@ int main(int argc, char *argv[]){
     std::string config("configuration.txt");
     PDDSparseGM PDDS(argc,argv,config);
     //First iteration
-    //PDDS.Solve(boundvalprob);
+    PDDS.Solve(boundvalprob);
     PDDS.Solve_Subdomains_LinIt_First(boundvalprob);
     PDDS.Fullfill_Subdomains_Random(nonlinboundprob,0.1);
     //Following iterations
-    for(int i = 0; i < 7; i++){
+    for(int i = 0; i < 16; i++){
         PDDS.Solve_Iterative_numVR(i,nonlinboundprob);
         PDDS.Solve_Subdomains_LinIt(nonlinboundprob);
     }

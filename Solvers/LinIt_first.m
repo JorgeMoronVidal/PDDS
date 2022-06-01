@@ -62,7 +62,8 @@ b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
 L(b,:) = zeros(4*N,(N+1)^2); 
 L(b,b) = eye(4*N);
-rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy)+C2_iteration*(0.0* ones(size(xx)) +sin(pi*xx).*sin(pi*yy));%- 3*(ones(size(xx)) + sin(pi*xx).*sin(pi*yy));
+rhs = -(4*pi^2 +2*pi^4-C2_iteration)*sin(2*pi*xx +0.5*ones(size(xx))).*cos((pi^2)*(xx+yy)) - (4*pi^3)*cos(2*pi*xx +0.5*ones(size(xx))).*sin((pi^2)*(xx+yy));
+%rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy)+C2_iteration*(0.0* ones(size(xx)) +sin(pi*xx).*sin(pi*yy));%- 3*(ones(size(xx)) + sin(pi*xx).*sin(pi*yy));
 %rhs = Monegros(xx,yy,'d2udx2') + Monegros(xx,yy,'d2udy2') +C2_iteration*(Monegros(xx,yy,'u'));
 %rhs(b) = sin(omegax*pi*xx(b) + omegay*pi*yy(b)) + cos(omegapx*pi*xx(b) + omegapy*pi*yy(b));
 b_west = find(xx==x_west(1));

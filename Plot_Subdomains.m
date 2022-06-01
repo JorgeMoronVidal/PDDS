@@ -13,11 +13,11 @@ for l = 1:length(Iterations)
        end
     end
   [r,c] = size(labels);
-  Solution = subplot(1,2,1);
-  %Correction = subplot(1,3,2);
-  Error = subplot(1,2,2);
+  Solution = subplot(1,3,1);
+  Correction = subplot(1,3,2);
+  Error = subplot(1,3,3);
   hold(Solution,'on');
-  %hold(Correction,'on');
+  hold(Correction,'on');
   hold(Error,'on');
   c_axis = [0,0];
   error_cmap = flip(gray);
@@ -45,11 +45,11 @@ for l = 1:length(Iterations)
       colormap(Solution,'parula');
       s = surf(xx,yy,uu);
       s.EdgeColor = 'none';
-      %subplot(Correction)
-      %colormap(Correction,'jet');
-      %s = surf(xx,yy,vv);
-      %s.EdgeColor = 'none';
-      uu_a = ones(size(xx))*0 + sin(pi*xx).*sin(pi*yy);
+      subplot(Correction)
+      colormap(Correction,'jet');
+      s = surf(xx,yy,vv);
+      s.EdgeColor = 'none';
+      uu_a = sin(2*pi*xx +0.5*ones(size(xx))).*cos((pi^2)*(xx+yy));
       %uu_a = Monegros(xx,yy,'u');
       subplot(Error)
       %cyclic_cmap = [gray;flip(gray)];
@@ -74,11 +74,11 @@ for l = 1:length(Iterations)
    view(2)
    %caxis(Solution,[0 1]);
    colorbar
-   %subplot(Correction)
-   %axis square
-   %title('Solution step 0')
-   %set(gca,'FontSize',16)
-   %colorbar
+   subplot(Correction)
+   axis square
+   title('Correction')
+   set(gca,'FontSize',16)
+   colorbar
    %view(2)
    subplot(Error)
    title('Absolute Error')

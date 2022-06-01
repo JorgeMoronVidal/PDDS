@@ -1,5 +1,4 @@
-nNodes is 357
-Processor 1828540 ended sending its contribution to G and B
+nNodes is 61
 Processor 1828540 ended sending its contribution to G and B
 Processor 1828540 ended sending its contribution to G and B
 Processor 1828540 ended sending its contribution to G and B
