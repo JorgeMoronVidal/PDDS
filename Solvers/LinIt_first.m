@@ -24,8 +24,8 @@
 %Set up grid and 2D Laplacian, boundary points included:
 args = argv();
 id = args{1};
-C2_iteration = 1;
-Alpha_iteration =3;
+C2_iteration = 6.03;
+Alpha_iteration =6.7;
 file = sprintf("Input/Interfaces/North_%s.txt", id);
 table = csvread(file);
 x_north = table(:,1);

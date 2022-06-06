@@ -90,4 +90,5 @@ for l = 1:length(Iterations)
    view(2)
    disp(norm(ERR));
    disp(sqrt(MSE));
+   
 end

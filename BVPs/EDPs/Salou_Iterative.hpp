@@ -5,8 +5,8 @@
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
 #include <gsl/gsl_errno.h>
-#define C2_iteration 1.0
-#define Alpha_iteration 3.0
+#define C2_iteration 6.03
+#define Alpha_iteration 6.7
 //#include "../LUT.hpp"
 inline double Equation_u(Eigen::Vector2d X, double t){
     return  sin(2*M_PI*X(0)+0.5)*cos(M_PI*M_PI*(X(0)+X(1)));

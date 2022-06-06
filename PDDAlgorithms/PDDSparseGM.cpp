@@ -2685,6 +2685,7 @@ void PDDSparseGM::Process_Metadata(void){
         bias_num_sparse.coeff(i,0), bias_trap_sparse.coeff(i,0));
         
     }
+    fclose(pf);
 }
 Eigen::Vector2d PDDSparseGM::Node_Position(int node_index){
     Eigen::Vector2d output;
