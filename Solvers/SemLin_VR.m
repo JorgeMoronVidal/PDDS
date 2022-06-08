@@ -86,7 +86,7 @@ uu_LUT = interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline');
 xx_LUT = xx;
 yy_LUT = yy;
 %rhs = (interp2(xx_LUT,yy_LUT,vv_LUT,xx,yy,'spline').^2).*(3*(interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline'))-2*interp2(xx_LUT,yy_LUT,vv_LUT,xx,yy,'spline'));
-rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) - (ones(size(xx))+sin(pi*xx).*sin(pi*yy)).^3 -2.0*interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline').^3;
+rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) - (1.1*ones(size(xx))+sin(pi*xx).*sin(pi*yy)).^3 -2.0*interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'spline').^3;
 rhs = rhs(:);
 xx = xx(:); yy = yy(:);
 D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I)-3*diag((interp2(xx_LUT,yy_LUT,uu_LUT,xx,yy,'cubic')).^2);

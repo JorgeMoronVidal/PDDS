@@ -1,96 +1,3 @@
-#! octave-qf
-input=csvread('../Output/solution.csv',1,0);
-input_2 = csvread('../Output/Debug/knot_metadata.csv',1,0);
-N = 500;
-N_knots_per_int = 32;
-N_int = [5 5];
-knot_index=input(1:end,1);
-x_full = input(1:end,2);
-y_full = input(1:end,3);
-u_full = input(1:end,5);
-spline_full = NaN(size(u_full));
-u_full_a = input(1:end,4);
-var_full = input_2(1:end,6)/N;
-cross_index = NaN(N_int-[1 1]);
-index_centinel = 0;
-for vertical_lines = 1:(N_int(2)-1) 
-    cross_index(vertical_lines,1:(N_int(2)-1)) = ones(N_int(2)-1,1) + index_centinel*ones(N_int(2)-1,1) +[1:(N_int(2)-1)]'*(N_knots_per_int-1);
-    x = x_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
-    y = y_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
-    u = u_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
-    u_a = u_full_a(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
-    x=x-min(x);
-    y=y-min(y);
-    r=sqrt(x.^2+y.^2);
-    var= var_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
-    var(1) = 0.0;
-    var(end) = 0.0;
-    idxmax=find(max(r)==r);
-    idxmin=find(min(r)==r);
-    if norm(var)>0
-      [spline,smoothparam,crossvalue,Var_spline,CI]=csapsGCV(r,u,[],r,var+1e-12);
-    else
-      [spline,smoothparam,crossvalue,Var_spline,CI]=csapsGCV(r,u,[],r,[]);
-    end
-    spline(1) = u(1);
-    spline(end) = u(end);
-    spline_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1)) = spline;
-    index_centinel = vertical_lines*((N_knots_per_int-1)*N_int(2)+1);
-    %figure;
-    %hold on;
-    %plot(y,u-u_a,'-*')
-    %plot(y,spline-u_a,'-*')
-    %title(sprintf("Vertical line %d",vertical_lines))
-    %legend("Err. Original", "Err. Spline")
-    %dlmwrite('splines_output.csv',spline);
-end
-%cross = u_full(cross_index);
-%cross_x = x_full(cross_index);
-%cross_y = y_full(cross_index);
-for horizontal_lines = 1:(N_int(1)-1)
-    indexes = [index_centinel + 1: index_centinel + N_knots_per_int]';
-    index_centinel = index_centinel + N_knots_per_int;
-    for interfaces = 2:N_int(1)
-        indexes = [indexes;cross_index(interfaces-1,horizontal_lines)];
-        indexes = [indexes; [index_centinel + 1: index_centinel + N_knots_per_int-2]'];
-        index_centinel = index_centinel + N_knots_per_int -2 ;
-    end
-     x = x_full(indexes);
-     y = y_full(indexes);
-     u = u_full(indexes);
-     u_a = u_full_a(indexes);
-     x=x-min(x);
-     y=y-min(y);
-     r=sqrt(x.^2+y.^2);
-     var= var_full(indexes);
-     var(1) = 0.0;
-     var(end) = 0.0;
-     idxmax=find(max(r)==r);
-     idxmin=find(min(r)==r);
-     if norm(var)>0
-       [spline,smoothparam,crossvalue,Var_spline,CI]=csapsGCV(r,u,[],r,var+1e-12);
-     else
-       [spline,smoothparam,crossvalue,Var_spline,CI]=csapsGCV(r,u,[],r,[]);
-     end
-     spline(1) = u(1);
-     spline(end) = u(end);
-     spline_full(indexes) = spline; 
-     %figure;
-     %hold on;
-     %plot(x,u-u_a,'-*')
-     %plot(x,spline-u_a,'-*')
-     %title(sprintf("Horizontal line %d",horizontal_lines))
-     %legend("Err. Original", "Err. Spline")
-     %dlmwrite('splines_output.csv',spline);
-end
-output = input;
-output(1:end,5) = spline_full;
-output(1:end,6) = spline_full-u_full_a;
-output(1:end,7) = output(1:end,6)./u_full_a;
-fileID = fopen('../Output/solution.csv','w');
-fprintf(fileID,'Knot_index,x,y,sol_analytic,sol_PDDS,err,rerr\n');
-fileID = fopen('../Output/solution.csv','a');
-fprintf(fileID,'%d,%f,%f,%e,%e,%e,%e\n',output');
 function [v,p,V,VAR,CI] = csapsGCV(x,y,p,xx,W)
 % Written by Matthew Taliaferro
 %    The function outputs the values from the spline interpolation, v, the
@@ -344,3 +251,99 @@ function T = return_T(h)
 
 T = (diag(h(2:end-1),-1)+diag(2*(h(1:end-1)+h(2:end)),0)+diag(h(2:end-1),1))/3;
 end
+%#! octave-qf
+input=csvread('../Output/solution.csv',1,0);
+input_2 = csvread('../Output/Debug/knot_metadata.csv',1,0);
+N = 500;
+N_knots_per_int = 32;
+N_int = [5 5];
+knot_index=input(1:end,1);
+x_full = input(1:end,2);
+y_full = input(1:end,3);
+u_full = input(1:end,5);
+spline_full = NaN(size(u_full));
+u_full_a = input(1:end,4);
+var_full = input_2(1:end,6)/N;
+cross_index = NaN(N_int-[1 1]);
+index_centinel = 0;
+for vertical_lines = 1:(N_int(2)-1) 
+    cross_index(vertical_lines,1:(N_int(2)-1)) = ones(N_int(2)-1,1) + index_centinel*ones(N_int(2)-1,1) +[1:(N_int(2)-1)]'*(N_knots_per_int-1);
+    x = x_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
+    y = y_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
+    u = u_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
+    u_a = u_full_a(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1));
+    x=x-min(x);
+    y=y-min(y);
+    r=sqrt(x.^2+y.^2);
+    var= var_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1))/N;
+    var(1) = 0.0;
+    var(end) = 0.0;
+    %var = NaN(size(u));
+    idxmax=find(max(r)==r);
+    idxmin=find(min(r)==r);
+    if norm(var)>0
+      [spline,smoothparam,crossvalue,Var_spline,CI]=csapsGCV(r,u,[],r,var+1e-12);
+    else
+      [spline,smoothparam,crossvalue,Var_spline,CI]=csapsGCV(r,u,[],r,[]);
+    end
+    spline(1) = u(1);
+    spline(end) = u(end);
+    spline_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1)) = spline;
+    index_centinel = vertical_lines*((N_knots_per_int-1)*N_int(2)+1);
+    disp(smoothparam)
+    %figure;
+    %hold on;
+    %plot(y,u-u_a,'-*')
+    %plot(y,spline-u_a,'-*')
+    %title(sprintf("Vertical line %d",vertical_lines))
+    %legend("Err. Original", "Err. Spline")
+    %dlmwrite('splines_output.csv',spline);
+end
+%cross = u_full(cross_index);
+%cross_x = x_full(cross_index);
+%cross_y = y_full(cross_index);
+for horizontal_lines = 1:(N_int(1)-1)
+    indexes = [index_centinel + 1: index_centinel + N_knots_per_int]';
+    index_centinel = index_centinel + N_knots_per_int;
+    for interfaces = 2:N_int(1)
+        indexes = [indexes;cross_index(interfaces-1,horizontal_lines)];
+        indexes = [indexes; [index_centinel + 1: index_centinel + N_knots_per_int-2]'];
+        index_centinel = index_centinel + N_knots_per_int -2 ;
+    end
+     x = x_full(indexes);
+     y = y_full(indexes);
+     u = u_full(indexes);
+     u_a = u_full_a(indexes);
+     x=x-min(x);
+     y=y-min(y);
+     r=sqrt(x.^2+y.^2);
+     var= var_full(indexes)/N;
+     var(1) = 0.0;
+     var(end) = 0.0;
+     %var = NaN(size(u));
+     idxmax=find(max(r)==r);
+     idxmin=find(min(r)==r);
+     if norm(var)>0
+       [spline,smoothparam,crossvalue,Var_spline,CI]=csapsGCV(r,u,[],r,var+1e-12);
+     else
+       [spline,smoothparam,crossvalue,Var_spline,CI]=csapsGCV(r,u,[],r,[]);
+     end
+     spline(1) = u(1);
+     spline(end) = u(end);
+     spline_full(indexes) = spline;
+     disp(smoothparam)
+     %figure;
+     %hold on;
+     %plot(x,u-u_a,'-*')
+     %plot(x,spline-u_a,'-*')
+     %title(sprintf("Horizontal line %d",horizontal_lines))
+     %legend("Err. Original", "Err. Spline")
+     %dlmwrite('splines_output.csv',spline);
+end
+output = input;
+output(1:end,5) = spline_full;
+output(1:end,6) = spline_full-u_full_a;
+output(1:end,7) = output(1:end,6)./u_full_a;
+fileID = fopen('Output/solution.csv','w');
+fprintf(fileID,'Knot_index,x,y,sol_analytic,sol_PDDS,err,rerr\n');
+fprintf(fileID,'%d,%f,%f,%e,%e,%e,%e\n',output');

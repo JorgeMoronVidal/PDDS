@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
     PDDS.Solve_Subdomains(boundvalprob);
     //PDDS.Fullfill_Subdomains_Random(nonlinboundprob,0.1);
     //Following iterations
-    for(int i = 0; i < 4; i++){
+    for(int i = 0; i < 10; i++){
         PDDS.Solve_SemiLin_numVR(i,nonlinboundprob);
         PDDS.Solve_Subdomains_SemiLin(2,nonlinboundprob);
     }

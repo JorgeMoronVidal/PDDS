@@ -1,4 +1,4 @@
-function [v,p,V,VAR,CI] = csapsGCV(x,y,p,xx,W)
+%function [v,p,V,VAR,CI] = csapsGCV(x,y,p,xx,W)
 % Written by Matthew Taliaferro
 %    The function outputs the values from the spline interpolation, v, the
 % value of the smoothing paramter, p, the value of the generalized

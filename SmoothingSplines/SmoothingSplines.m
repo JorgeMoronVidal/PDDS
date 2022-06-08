@@ -55,7 +55,6 @@ function [v,p,V,VAR,CI] = csapsGCV(x,y,p,xx,W)
 %
 % Wahba, Grace. Spline models for observational data. Society for
 %  industrial and applied mathematics, 1990. Chapter 4 and 5.
-
 N = length(x);
 if nargin < 5, W = []; end
 
@@ -283,6 +282,7 @@ for vertical_lines = 1:(N_int(2)-1)
     end
     spline(1) = u(1);
     spline(end) = u(end);
+    disp(smoothparam)
     spline_full(index_centinel+1:vertical_lines*((N_knots_per_int-1)*N_int(2)+1)) = spline;
     index_centinel = vertical_lines*((N_knots_per_int-1)*N_int(2)+1);
     %figure;
@@ -321,7 +321,8 @@ for horizontal_lines = 1:(N_int(1)-1)
      end
      spline(1) = u(1);
      spline(end) = u(end);
-     spline_full(indexes) = spline; 
+     spline_full(indexes) = spline;
+     disp(smoothparam)
      %figure;
      %hold on;
      %plot(x,u-u_a,'-*')
@@ -336,6 +337,5 @@ output(1:end,6) = spline_full-u_full_a;
 output(1:end,7) = output(1:end,6)./u_full_a;
 fileID = fopen('Output/solution.csv','w');
 fprintf(fileID,'Knot_index,x,y,sol_analytic,sol_PDDS,err,rerr\n');
-fileID = fopen('Output/solution.csv','a');
 fprintf(fileID,'%d,%f,%f,%e,%e,%e,%e\n',output');
 

@@ -653,6 +653,8 @@ void PDDSparseGM::Solve(bvp BoundValProb){
         #endif
         //Compute_B_Deterministic();
         Compute_Solution(BoundValProb);
+        
+        system("octave-cli SmoothingSplines/SmoothingSplines.m");
         //pFile = fopen(debug_fname,"a");
         //double end = MPI_Wtime();
     } else {
@@ -3468,6 +3470,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         //pFile = fopen(debug_fname,"a");
         //double end = MPI_Wtime();
         Process_Metadata();
+        system("octave-cli SmoothingSplines/SmoothingSplines.m");
         B.clear();
         B_i.clear();
         //Compute_B_Deterministic();
@@ -3722,6 +3725,7 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
         //pFile = fopen(debug_fname,"a");
         //double end = MPI_Wtime();
         Process_Metadata();
+        system("octave-cli SmoothingSplines/SmoothingSplines.m");
         B.clear();
         B_i.clear();
         //Compute_B_Deterministic();
