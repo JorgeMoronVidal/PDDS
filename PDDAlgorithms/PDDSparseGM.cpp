@@ -3387,7 +3387,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         T_vec_phixi.clear(); T_vec_phip.clear(); T_vec_phiphip.clear(); T_vec_phipxi.clear();
         T_vec_Estvar.clear(); T_vec_RNGCalls.clear(); T_vec_phi_trap.clear(); T_vec_phiphi_trap.clear();
         T_vec_phi_trap_VR.clear();T_vec_phiphi_trap_VR.clear(); T_vec_bias_num.clear();
-        T_vec_bias_trap.clear(); T_vec_Estvar_VR.clear();
+        T_vec_bias_trap.clear();
         G.clear(); G_CT.clear(); B.clear(); B_CT.clear(); G_var.clear(); B_var.clear();
         APL.clear(); times.clear(); xi.clear(); phi.clear(); xixi.clear(); phiphi.clear();
         phixi.clear(); phip.clear(); phiphip.clear(); phipxi.clear(); Est_var.clear();
@@ -3510,7 +3510,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         APL.clear(); times.clear(); xi.clear(); phi.clear(); xixi.clear(); phiphi.clear();
         phixi.clear(); phip.clear(); phiphip.clear(); phipxi.clear(); Est_var.clear();
         RNGCalls.clear(); PCoeff_o.clear(); bias_num.clear(); bias_trap.clear();
-        PCoeff_n.clear(); phi_trap.clear(); phiphi_trap.clear();
+        PCoeff_n.clear(); phi_trap.clear(); phiphi_trap.clear(); Est_var_VR.clear();
         //printf("Intermediate Step\n");
         while(! Receive_Interface(x,y,indexes)){
             //stencil.Print(indexes[0]);
@@ -3582,10 +3582,6 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
                 }
                 delete array_x; delete array_y; delete array_u;
                 solver.Update();
-                //B.push_back(B_temp);
-                //B_CT.push_back(solver.B_CT);
-                //B_i.push_back(auxjob.index[0]);
-                //B_var.push_back(solver.var_B);
                 xi.push_back(solver.xi_num);
                 phi.push_back(solver.phi_num);
                 xixi.push_back(solver.xixi_num);
@@ -3596,17 +3592,16 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
                 phipxi.push_back(solver.xiphi_sublinear_num);
                 APL.push_back(solver.APL);
                 Est_var.push_back(solver.phiphi_num-solver.phi_num*solver.phi_num);
+                Est_var_VR.push_back(solver.phiphi_VR_num-solver.phi_VR_num*solver.phi_VR_num);
+                //std::cout << solver.phiphi_VR_num << "\t" << solver.phi_VR_num*solver.phi_VR_num << std::endl;
                 RNGCalls.push_back((double)solver.RNGC);
                 phi_trap.push_back(solver.phi);
                 //std::cout << "Index " << indexes[knot] << "\t FKAC num sol " << solver.phi_num << "\t FKAC sol" << solver.phi << "\n";
                 phiphi_trap.push_back(solver.phiphi);
                 phi_trap_VR.push_back(solver.phi+solver.xi);
-                phiphi_trap_VR.push_back(pow(solver.phi+solver.xi,2.0));
+                phiphi_trap_VR.push_back(solver.phiphi_VR);
                 bias_num.push_back(solver.phi_sublinear_num - solver.phi_num); 
                 bias_trap.push_back(solver.phi_sublinear - solver.phi); 
-                //knot_end = MPI_Wtime();
-                //times.push_back((knot_end-knot_start));
-                //knot_end = MPI_Wtime();
                 
             }
         }
