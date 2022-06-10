@@ -60,7 +60,7 @@ b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
 L(b,:) = zeros(4*N,(N+1)^2); 
 L(b,b) = eye(4*N);
-rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) - (1.1*ones(size(xx)) + sin(pi*xx).*sin(pi*yy)).^3 - 2.2*ones(size(xx));
+rhs = -2*pi*pi*sin(pi*xx).*sin(pi*yy) - (1.1*ones(size(xx)) + sin(pi*xx).*sin(pi*yy)).^3 - 2.662*ones(size(xx));
 %rhs(b) = sin(omegax*pi*xx(b) + omegay*pi*yy(b)) + cos(omegapx*pi*xx(b) + omegapy*pi*yy(b));
 b_west = find(xx==x_west(1));
 rhs(b_west) = interp1(y_west,sol_west, yy(b_west),'spline');
