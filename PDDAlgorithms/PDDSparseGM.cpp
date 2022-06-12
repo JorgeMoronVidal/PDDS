@@ -2758,6 +2758,7 @@ void PDDSparseGM::Compute_Solution(bvp BoundValProb){
     Bd = Eigen::VectorXd(B_sparse);
     guess = Bd*0;
     B_sparse.resize(0,0);
+    Update_TimeFile("Building Up G and B",1);
     //Eigen::SparseLU<Eigen::SparseMatrix<double> > solver_LU;
     //solver_LU.compute(G_sparse);
     //solver_LU.factorize(G_sparse);
@@ -2765,6 +2766,7 @@ void PDDSparseGM::Compute_Solution(bvp BoundValProb){
     Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solver_IT;
     solver_IT.compute(G_sparse);
     ud = solver_IT.solveWithGuess(Bd,guess);
+    Update_TimeFile("Solving system",1);
     ofile = fopen("Output/solution.csv","w");
     fprintf(ofile,"Knot_index,x,y,sol_analytic,sol_PDDS,err,rerr\n");
     double sol, err, rerr;
@@ -2776,6 +2778,7 @@ void PDDSparseGM::Compute_Solution(bvp BoundValProb){
         sol,ud(i),err,rerr);
     }
     fclose(ofile);
+    Update_TimeFile("Writing Solution",1);
 }
 /*void PDDSparseGM::Compute_Solution_2(bvp BoundValProb){
     Eigen::SparseMatrix<double> G_sparse, I_sparse, B_sparse,C_sparse;
@@ -3372,7 +3375,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
     if(myid==server){
         FILE *pFile;
         pFile = fopen("Output/Debug/times.txt","a");
-        fprintf(pFile,"************Intermediate Step***********\n");
+        fprintf(pFile,"************ITERATION***********\n");
         fclose(pFile);
         //system("mv Output/solution.csv Output/solution_nvarred.csv");
         //system("mv Output/Debug/B.csv Output/Debug/B_nvarred.csv");
@@ -3397,9 +3400,6 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         char order[256];
         sprintf(order,"cp -r Output Output_%d",iteration);
         system(order);
-        pFile = fopen("Output/Debug/times.txt","a");
-        fprintf(pFile,"************Solving with VR***********\n");
-        fclose(pFile);
         std::vector<int> aux_vec;
         std::vector<Eigen::Vector2d> positions;
         std::vector<int> indexes;

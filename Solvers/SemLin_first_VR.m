@@ -54,7 +54,7 @@ sol_west = table(:,3);
 clear table;
 N = size(x_north)(1); [Dx,Dy,x,y] = cheb(N,x_north,y_west);
 [xx,yy] = meshgrid(x,y); xx = xx(:); yy = yy(:);
-D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I) - 3*eye(size(kron(I,D2x)));
+D2x = Dx^2; D2y = Dy^2; I = eye(N+1); L = kron(I,D2x) + kron(D2y,I) - 3.63*eye(size(kron(I,D2x)));
 %Impose boundary conditions and -f function by replacing appropriate rows of L:
 b = find(xx==x_west(1) | xx == x_east(1) | yy==y_north(1) | yy == y_south(1));
 % boundary pts
