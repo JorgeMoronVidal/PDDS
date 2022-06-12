@@ -3470,9 +3470,9 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         //pFile = fopen(debug_fname,"a");
         //double end = MPI_Wtime();
         Process_Metadata();
-        Update_TimeFile("Processing metadata",1)
+        Update_TimeFile("Processing metadata",1);
         system("octave-cli SmoothingSplines/SmoothingSplines.m");
-        Update_TimeFile("Smoothing splines",1)
+        Update_TimeFile("Smoothing splines",1);
         B.clear();
         B_i.clear();
         //Compute_B_Deterministic();
