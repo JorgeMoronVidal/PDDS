@@ -254,7 +254,7 @@ end
 
 input=csvread('Output/solution.csv',1,0);
 N_knots_per_int = 32;
-N_int = [10 10];
+N_int = [5 5];
 knot_index=input(1:end,1);
 x_full = input(1:end,2);
 y_full = input(1:end,3);
