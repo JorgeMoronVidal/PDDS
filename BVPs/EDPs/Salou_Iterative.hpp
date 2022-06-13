@@ -7,7 +7,7 @@
 #include <gsl/gsl_errno.h>
 #define C2_iteration 20.0
 #define Alpha_iteration 22.0
-#define k_rescale 2.0
+#define k_rescale 9.0
 //#include "../LUT.hpp"
 inline double Equation_u(Eigen::Vector2d X, double t){
     return  sin(2*M_PI*X(0)+0.5)*cos(M_PI*M_PI*(X(0)+X(1)));
