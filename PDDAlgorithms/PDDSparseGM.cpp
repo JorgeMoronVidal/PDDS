@@ -3374,9 +3374,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
     //Compute the PDDSparse Matrix
     if(myid==server){
         FILE *pFile;
-        pFile = fopen("Output/Debug/times.txt","a");
-        fprintf(pFile,"************ITERATION***********\n");
-        fclose(pFile);
+        Update_TimeFile("Iteration begins",1);
         //system("mv Output/solution.csv Output/solution_nvarred.csv");
         //system("mv Output/Debug/B.csv Output/Debug/B_nvarred.csv");
         //system("mv Output/Debug/G.csv Output/Debug/G_nvarred.csv");

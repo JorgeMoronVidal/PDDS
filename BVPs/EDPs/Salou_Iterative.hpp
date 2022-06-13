@@ -35,7 +35,7 @@ inline double EquationLI_f(Eigen::Vector2d X, double t){
 inline double EquationLI_f_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT_ui, gsl_interp_accel *xacc_ui,
                 gsl_interp_accel *yacc_ui,gsl_spline2d *LUT_u0, gsl_interp_accel *xacc_u0,
                 gsl_interp_accel *yacc_u0){
-    return (1.0/k_rescale)*(-EquationLI_d2udx2(X)-EquationLI_d2udy2(X) - C2_iteration*Equation_u(X,t) +Alpha_iteration * gsl_spline2d_eval(LUT_ui, X(0), X(1), xacc_ui, yacc_ui);
+    return (1.0/k_rescale)*(-EquationLI_d2udx2(X)-EquationLI_d2udy2(X) - C2_iteration*Equation_u(X,t) +Alpha_iteration * gsl_spline2d_eval(LUT_ui, X(0), X(1), xacc_ui, yacc_ui));
 }
 inline double EquationLI_u_LUT(Eigen::Vector2d X, double t,gsl_spline2d *LUT, gsl_interp_accel *xacc,
                 gsl_interp_accel *yacc){

@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
     PDDS.Solve(boundvalprob);
     PDDS.Solve_Subdomains_LinIt_First(boundvalprob);
     //Following iterations
-    for(int i = 0; i < 1; i++){
+    for(int i = 0; i < 10; i++){
         PDDS.Solve_Iterative_numVR(i,nonlinboundprob);
         PDDS.Solve_Subdomains_LinIt(nonlinboundprob);
     }
