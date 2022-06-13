@@ -3398,6 +3398,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         char order[256];
         sprintf(order,"cp -r Output Output_%d",iteration);
         system(order);
+        Update_TimeFile("Copying files",1);
         std::vector<int> aux_vec;
         std::vector<Eigen::Vector2d> positions;
         std::vector<int> indexes;
@@ -3620,10 +3621,8 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
     //if(myid==server) Print_Problem();
     //Compute the PDDSparse Matrix
     if(myid==server){
+        Update_TimeFile("Iteration begins",1);
         FILE *pFile;
-        pFile = fopen("Output/Debug/times.txt","a");
-        fprintf(pFile,"************Intermediate Step***********\n");
-        fclose(pFile);
         //system("mv Output/solution.csv Output/solution_nvarred.csv");
         //system("mv Output/Debug/B.csv Output/Debug/B_nvarred.csv");
         //system("mv Output/Debug/G.csv Output/Debug/G_nvarred.csv");
@@ -3646,10 +3645,8 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
         G_j.clear(); G_i.clear(); B_i.clear(); bias_num.clear(); bias_trap.clear();
         char order[256];
         sprintf(order,"cp -r Output Output_%d",iteration);
+        Update_TimeFile("Copying files",1);
         system(order);
-        pFile = fopen("Output/Debug/times.txt","a");
-        fprintf(pFile,"************Solving with VR***********\n");
-        fclose(pFile);
         std::vector<int> aux_vec;
         std::vector<Eigen::Vector2d> positions;
         std::vector<int> indexes;
@@ -3705,7 +3702,7 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
                 
             }
         }
-        Update_TimeFile("MC Simulations VR",server+1);
+        Update_TimeFile("MC Simulations",server+1);
         //G and B are received from the workers
         #ifdef LOCAL_SERVERS
         #else
@@ -3713,14 +3710,16 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
              Receive_G_B();
              Receive_Metadata();
         }
-        Update_TimeFile("Receiving G and B VR",server+1);
+        Update_TimeFile("Receiving G and B",server+1);
         #endif
         //Compute_B_Deterministic();
         Compute_Solution(Lin_BVP);
         //pFile = fopen(debug_fname,"a");
         //double end = MPI_Wtime();
         Process_Metadata();
+        Update_TimeFile("Processing metadata",1);
         system("octave-cli SmoothingSplines/SmoothingSplines.m");
+        Update_TimeFile("Smoothing Splines",1);
         B.clear();
         B_i.clear();
         //Compute_B_Deterministic();
