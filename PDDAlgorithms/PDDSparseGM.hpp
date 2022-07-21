@@ -68,6 +68,8 @@
 #define TAG_INTERFACE_INDEX 162
 //Interfaces
 #define INTERSECTIONS_YES
+//Stencil 
+//#define SQUARE_PATCHES
 //MPI Implementation
 //#define LOCAL_SERVERS
 #include "../Solvers/EMFKACSolver.hpp"
@@ -168,6 +170,7 @@ class PDDSparseGM{
        std::vector<std::vector<int> > Get_Interfaces(int index);
        /*Returns the stencils labels*/
        std::map<direction, std::vector<std::vector <int> > > Labels_Stencil(int index);
+       std::map<direction, std::vector<std::vector <int> > > Labels_Stencil_Square(int index);
        /*Sends node information*/
        void Send_Node(PDDSJob job);
        /*Send node information*/

@@ -1157,8 +1157,131 @@ std::map<direction, std::vector<std::vector <int> > > PDDSparseGM::Labels_Stenci
     printf("\n"); */
     return output;
 }
+std::map<direction, std::vector<std::vector <int> > > PDDSparseGM::Labels_Stencil_Square(int index){
+    std::map<direction, std::vector<std::vector <int> > > output;
+    std::vector< std::vector<int> > node_interfaces;
+    Interface inter;
+    std::vector< int > interface_east, interface_west,interface_north, interface_south;
+    int max_v = 0, max_h = 0;
+    node_interfaces = Get_Interfaces(index);
+    FILE *dfile;
+    switch(node_interfaces.size()){
+        case 1:
+            inter = interfaces[interface_map[node_interfaces[0]]];
+            /*for(int i = 0; i < (int) inter.N().size(); i ++){
+                if(interface_map.count(inter.N()[i]) > 0) output[North].push_back(inter.N()[i]);
+            }
+            for(int i = 0; i < (int) inter.S().size(); i ++){
+                if(interface_map.count(inter.S()[i]) > 0) output[South].push_back(inter.S()[i]);
+            }
+            for(int i = 0; i < (int) inter.E().size(); i ++){
+                if(interface_map.count(inter.E()[i]) > 0) output[East].push_back(inter.E()[i]);
+            }
+            for(int i = 0; i < (i nt) inter.W().size(); i ++){
+                if(interface_map.count(inter.W()[i]) > 0) output[West].push_back(inter.W()[i]);
+            }*/
+            inter = interfaces[interface_map[node_interfaces[0]]];
+            unsigned int cent = -1;
+            for(unsigned int i = 0; i < inter.index.size(); i ++){
+                if(inter.index[i] == index)cent = i;
+            }
+            if(cent < 0){
+                std::cout << "Labels Stencil Square is not working properly\n";
+                std::cout << "Index " << index << "\n";
+            }else{
+                if((1.0*cent/inter.index.size())<0.5){
+                    return Labels_Stencil(inter.index.front());
+                }else {
+                    return Labels_Stencil(inter.index.back());
+                }
+            }
+            break;
+        case 4:
+            max_h = std::max(node_interfaces[0][0], node_interfaces[1][0]);
+            max_h = std::max(max_h, node_interfaces[2][0]);
+            max_h = std::max(max_h, node_interfaces[3][0]);
+            max_v = std::max(node_interfaces[0][1], node_interfaces[1][1]);
+            max_v = std::max(max_v, node_interfaces[2][1]);
+            max_v = std::max(max_v, node_interfaces[3][1]);
+            if(node_interfaces[0][1]%2 == 1){
+                //Horizontal interface
+                if(node_interfaces[0][0] == max_h) interface_east = node_interfaces[0];
+                else interface_west = node_interfaces[0];
+            } else {
+                //Vertical interface
+                if(node_interfaces[0][1] == max_v) interface_north = node_interfaces[0];
+                else interface_south = node_interfaces[0];
+            }
+            if(node_interfaces[1][1]%2 == 1){
+                //Horizontal interface
+                if(node_interfaces[1][0] == max_h) interface_east = node_interfaces[1];
+                else interface_west = node_interfaces[1];
+            } else {
+                //Vertical interface
+                if(node_interfaces[1][1] == max_v) interface_north = node_interfaces[1];
+                else interface_south = node_interfaces[1];
+            }
+            if(node_interfaces[2][1]%2 == 1){
+                //Horizontal interface
+                if(node_interfaces[2][0] == max_h) interface_east = node_interfaces[2];
+                else interface_west = node_interfaces[2];
+            } else {
+                //Vertical interface
+                if(node_interfaces[2][1] == max_v) interface_north = node_interfaces[2];
+                else interface_south = node_interfaces[2];
+            }
+            if(node_interfaces[3][1]%2 == 1){
+                //Horizontal interface
+                if(node_interfaces[3][0] == max_h) interface_east = node_interfaces[3];
+                else interface_west = node_interfaces[3];
+            } else {
+                //Vertical interface
+                if(node_interfaces[3][1] == max_v) interface_north = node_interfaces[3];
+                else interface_south = node_interfaces[3];
+            }
+            inter = interfaces[interface_map[interface_west]];
+            if(interface_map.count(inter.N()[0]) > 0) output[North].push_back(inter.N()[0]);
+            inter = interfaces[interface_map[interface_east]];
+            if(interface_map.count(inter.N()[0]) > 0) output[North].push_back(inter.N()[0]);
+            inter = interfaces[interface_map[interface_west]];
+            if(interface_map.count(inter.S()[0]) > 0) output[South].push_back(inter.S()[0]);
+            inter = interfaces[interface_map[interface_east]];
+            if(interface_map.count(inter.S()[0]) > 0) output[South].push_back(inter.S()[0]);
+            inter = interfaces[interface_map[interface_south]];
+            if(interface_map.count(inter.E()[0]) > 0) output[East].push_back(inter.E()[0]);
+            inter = interfaces[interface_map[interface_north]];
+            if(interface_map.count(inter.E()[0]) > 0) output[East].push_back(inter.E()[0]);
+            inter = interfaces[interface_map[interface_south]];
+            if(interface_map.count(inter.W()[0]) > 0) output[West].push_back(inter.W()[0]);
+            inter = interfaces[interface_map[interface_north]];
+            if(interface_map.count(inter.W()[0]) > 0) output[West].push_back(inter.W()[0]);
+            break;
+        default:
+            dfile = fopen(debug_fname,"a");
+            fprintf(dfile,"Something went wrong in Labels_Stencil.\n");
+            fclose(dfile);
+    }
+    /*
+    printf("South: ");
+    for(int i = 0; i < (int) output[South].size(); i++) printf("[%d %d] ",output[South][i][0],output[South][i][1]);
+    printf("\n");
+    printf("North: ");
+    for(int i = 0; i < (int) output[North].size(); i++) printf("[%d %d] ",output[North][i][0],output[North][i][1]);
+    printf("\n");
+    printf("East: ");
+    for(int i = 0; i < (int) output[East].size(); i++) printf("[%d %d] ",output[East][i][0],output[East][i][1]);
+    printf("\n");
+    printf("West: ");
+    for(int i = 0; i < (int) output[West].size(); i++) printf("[%d %d] ",output[West][i][0],output[West][i][1]);
+    printf("\n"); */
+    return output;
+}
 void PDDSparseGM::Send_Stencil_Data(int index){
-    std::map<direction, std::vector<std::vector <int> > > labels = Labels_Stencil(index);
+    #ifdef SQUARE_PATCHES
+        std::map<direction, std::vector<std::vector <int> > > labels = Labels_Stencil_Square(index);
+    #else
+        std::map<direction, std::vector<std::vector <int> > > labels = Labels_Stencil(index);
+    #endif
     //The parameters of the stencil are computed
     double s_params[4];
     for(int i = 0; i < 4; i++) s_params[i] = parameters[i];
@@ -1447,7 +1570,11 @@ bool PDDSparseGM::Receive_Interface(std::vector<double> & x, std::vector<double>
     }
 }
 Stencil PDDSparseGM::Compute_Stencil(int index){
-    std::map<direction, std::vector<std::vector <int> > > labels = Labels_Stencil(index);
+    #ifdef SQUARE_PATCHES
+        std::map<direction, std::vector<std::vector <int> > > labels = Labels_Stencil_Square(index);
+    #else
+        std::map<direction, std::vector<std::vector <int> > > labels = Labels_Stencil(index);
+    #endif
     //The parameters of the stencil are computed
     double s_params[4];
     for(int i = 0; i < 4; i++) s_params[i] = parameters[i];

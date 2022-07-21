@@ -1,68 +1,24 @@
 task,total_tike,task_time,N_process
-Reading configuration File,5.641239e-04,5.629929e-04,5
-Fullfilling interfaces,6.630584e-03,6.066460e-03,1
+Reading configuration File,9.506459e-04,9.490942e-04,5
+Fullfilling interfaces,8.184117e-03,7.233471e-03,1
 ************WARMING UP***********
-MC Simulations,4.423605e+02,4.423538e+02,5
-Receiving G and B,4.716553e+02,2.929488e+01,5
-Fullfilling subdomains,4.824297e+02,1.077435e+01,1
-Solving subdomains,4.846081e+02,2.178467e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,9.363910e+02,4.517829e+02,5
-Receiving G and B VR,9.659893e+02,2.959825e+01,5
-FullfillinFullfill_subg subdomains,9.765192e+02,1.052995e+01,1
-Solving subdomains,9.789008e+02,2.381603e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,1.432045e+03,4.531444e+02,5
-Receiving G and B VR,1.460215e+03,2.817023e+01,5
-FullfillinFullfill_subg subdomains,1.470907e+03,1.069131e+01,1
-Solving subdomains,1.473323e+03,2.416287e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,1.924955e+03,4.516321e+02,5
-Receiving G and B VR,1.956090e+03,3.113474e+01,5
-FullfillinFullfill_subg subdomains,1.966881e+03,1.079114e+01,1
-Solving subdomains,1.969298e+03,2.417448e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,2.419773e+03,4.504746e+02,5
-Receiving G and B VR,2.450814e+03,3.104112e+01,5
-FullfillinFullfill_subg subdomains,2.461507e+03,1.069255e+01,1
-Solving subdomains,2.463903e+03,2.396120e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,2.916486e+03,4.525830e+02,5
-Receiving G and B VR,2.947150e+03,3.066465e+01,5
-FullfillinFullfill_subg subdomains,2.957708e+03,1.055764e+01,1
-Solving subdomains,2.960097e+03,2.389051e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,3.415169e+03,4.550718e+02,5
-Receiving G and B VR,3.443661e+03,2.849183e+01,5
-FullfillinFullfill_subg subdomains,3.454557e+03,1.089580e+01,1
-Solving subdomains,3.456973e+03,2.416160e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,3.909954e+03,4.529809e+02,5
-Receiving G and B VR,3.940315e+03,3.036107e+01,5
-FullfillinFullfill_subg subdomains,3.950854e+03,1.053881e+01,1
-Solving subdomains,3.953242e+03,2.388148e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,4.406152e+03,4.529107e+02,5
-Receiving G and B VR,4.436424e+03,3.027164e+01,5
-FullfillinFullfill_subg subdomains,4.447022e+03,1.059835e+01,1
-Solving subdomains,4.449455e+03,2.432385e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,4.941412e+03,4.919571e+02,5
-Receiving G and B VR,4.978001e+03,3.658882e+01,5
-FullfillinFullfill_subg subdomains,4.988761e+03,1.076003e+01,1
-Solving subdomains,4.991185e+03,2.424675e+00,5
-************Intermediate Step***********
-************Solving with VR***********
-MC Simulations VR,5.467651e+03,4.764657e+02,5
-Receiving G and B VR,5.495091e+03,2.743965e+01,5
-FullfillinFullfill_subg subdomains,5.507450e+03,1.235885e+01,1
-Solving subdomains,5.510720e+03,3.269959e+00,5
+MC Simulations,4.854954e+01,4.854136e+01,5
+Receiving G and B,5.108710e+01,2.537555e+00,5
+Building Up G and B,5.114442e+01,5.731839e-02,1
+Solving system,5.117188e+01,2.746300e-02,1
+Writing Solution,5.122812e+01,5.623671e-02,1
+Fullfilling subdomains,5.275842e+01,1.530306e+00,1
+Solving subdomains,5.392053e+01,1.162102e+00,5
+Iteration begins,5.392059e+01,6.874505e-05,1
+Copying files,5.395259e+01,3.199208e-02,1
+MC Simulations VR,9.023031e+01,3.627772e+01,5
+Receiving G, B and Metadata,9.283780e+01,2.607497e+00,5
+Building Up G and B,9.289548e+01,5.767707e-02,1
+Solving system,9.291994e+01,2.446037e-02,1
+Writing Solution,9.297668e+01,5.673978e-02,1
+Processing metadata,9.298492e+01,8.242564e-03,1
+Smoothing splines,9.480868e+01,1.823754e+00,1
+FullfillinFullfill_subg subdomains,9.483068e+01,2.199925e-02,1
+Solving subdomains,9.628808e+01,1.457401e+00,5
+Iteration begins,9.628816e+01,8.240913e-05,1
+Copying files,9.631782e+01,2.965994e-02,1
