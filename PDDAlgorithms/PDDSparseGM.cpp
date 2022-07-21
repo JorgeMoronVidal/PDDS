@@ -1165,6 +1165,7 @@ std::map<direction, std::vector<std::vector <int> > > PDDSparseGM::Labels_Stenci
     int max_v = 0, max_h = 0;
     node_interfaces = Get_Interfaces(index);
     FILE *dfile;
+    int cent = -1;
     switch(node_interfaces.size()){
         case 1:
             inter = interfaces[interface_map[node_interfaces[0]]];
@@ -1181,9 +1182,8 @@ std::map<direction, std::vector<std::vector <int> > > PDDSparseGM::Labels_Stenci
                 if(interface_map.count(inter.W()[i]) > 0) output[West].push_back(inter.W()[i]);
             }*/
             inter = interfaces[interface_map[node_interfaces[0]]];
-            unsigned int cent = -1;
             for(unsigned int i = 0; i < inter.index.size(); i ++){
-                if(inter.index[i] == index)cent = i;
+                if(inter.index[i] == index)cent = (int) i;
             }
             if(cent < 0){
                 std::cout << "Labels Stencil Square is not working properly\n";
