@@ -69,7 +69,7 @@
 //Interfaces
 #define INTERSECTIONS_YES
 //Stencil 
-//#define SQUARE_PATCHES
+#define SQUARE_PATCHES
 //MPI Implementation
 //#define LOCAL_SERVERS
 #include "../Solvers/EMFKACSolver.hpp"

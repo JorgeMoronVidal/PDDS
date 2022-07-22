@@ -653,8 +653,7 @@ void PDDSparseGM::Solve(bvp BoundValProb){
         #endif
         //Compute_B_Deterministic();
         Compute_Solution(BoundValProb);
-        
-        system("octave-cli SmoothingSplines/SmoothingSplines.m");
+        //system("octave-cli SmoothingSplines/SmoothingSplines.m");
         //pFile = fopen(debug_fname,"a");
         //double end = MPI_Wtime();
     } else {
@@ -1168,7 +1167,6 @@ std::map<direction, std::vector<std::vector <int> > > PDDSparseGM::Labels_Stenci
     int cent = -1;
     switch(node_interfaces.size()){
         case 1:
-            inter = interfaces[interface_map[node_interfaces[0]]];
             /*for(int i = 0; i < (int) inter.N().size(); i ++){
                 if(interface_map.count(inter.N()[i]) > 0) output[North].push_back(inter.N()[i]);
             }
@@ -1801,6 +1799,23 @@ gsl_spline2d *spline, gsl_interp_accel *xaccel, gsl_interp_accel *yaccel){
 void PDDSparseGM::Set_LUT_FILE_Solution(int index, std::vector<double> & aux_x,std::vector<double> & aux_y,std::vector<double> & aux_sol){
     std::vector<std::vector<int>> subd_index;
     std::vector< std::vector<int> > Iindexes_prev  = Get_Interfaces(index);
+    #ifdef SQUARE_PATCHES
+        Interface inter = interfaces[interface_map[Iindexes_prev[0]]];
+        int cent = -1;
+        for(unsigned int i = 0; i < inter.index.size(); i ++){
+                if(inter.index[i] == index)cent = (int) i;
+        }
+        if(cent < 0){
+            std::cout << "Labels Stencil Square is not working properly\n";
+            std::cout << "Index " << index << "\n";
+        }else{
+            if((1.0*cent/inter.index.size())<0.5){
+                    Iindexes_prev = Get_Interfaces(inter.index.front());
+            }else {
+                    Iindexes_prev = Get_Interfaces(inter.index.back());
+            }
+        }
+    #endif
     std::vector<int> Iindexes;
     for(unsigned int i = 0; i < Iindexes_prev.size(); i++){ Iindexes.push_back(Iindexes_prev[i][0]); Iindexes.push_back(Iindexes_prev[i][1]);}
     char aux_fname[256];
@@ -3597,8 +3612,8 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         //double end = MPI_Wtime();
         Process_Metadata();
         Update_TimeFile("Processing metadata",1);
-        system("octave-cli SmoothingSplines/SmoothingSplines.m");
-        Update_TimeFile("Smoothing splines",1);
+        //system("octave-cli SmoothingSplines/SmoothingSplines.m");
+        //Update_TimeFile("Smoothing splines",1);
         B.clear();
         B_i.clear();
         //Compute_B_Deterministic();
@@ -3845,8 +3860,8 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
         //double end = MPI_Wtime();
         Process_Metadata();
         Update_TimeFile("Processing metadata",1);
-        system("octave-cli SmoothingSplines/SmoothingSplines.m");
-        Update_TimeFile("Smoothing Splines",1);
+        //system("octave-cli SmoothingSplines/SmoothingSplines.m");
+        //Update_TimeFile("Smoothing Splines",1);
         B.clear();
         B_i.clear();
         //Compute_B_Deterministic();
