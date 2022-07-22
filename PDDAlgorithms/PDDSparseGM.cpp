@@ -1965,6 +1965,23 @@ void PDDSparseGM::Set_LUT_FILE_Solution(int index, std::vector<double> & aux_x,s
 void PDDSparseGM::Set_LUT_FILE_Correction(int index, std::vector<double> & aux_x,std::vector<double> & aux_y,std::vector<double> & aux_sol){
     std::vector<std::vector<int>> subd_index;
     std::vector< std::vector<int> > Iindexes_prev  = Get_Interfaces(index);
+    #ifdef SQUARE_PATCHES
+        Interface inter = interfaces[interface_map[Iindexes_prev[0]]];
+        int cent = -1;
+        for(unsigned int i = 0; i < inter.index.size(); i ++){
+                if(inter.index[i] == index)cent = (int) i;
+        }
+        if(cent < 0){
+            std::cout << "Labels Stencil Square is not working properly\n";
+            std::cout << "Index " << index << "\n";
+        }else{
+            if((1.0*cent/inter.index.size())<0.5){
+                    Iindexes_prev = Get_Interfaces(inter.index.front());
+            }else {
+                    Iindexes_prev = Get_Interfaces(inter.index.back());
+            }
+        }
+    #endif
     std::vector<int> Iindexes;
     for(unsigned int i = 0; i < Iindexes_prev.size(); i++){ Iindexes.push_back(Iindexes_prev[i][0]); Iindexes.push_back(Iindexes_prev[i][1]);}
     char aux_fname[256];
