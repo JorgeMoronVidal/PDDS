@@ -6,6 +6,9 @@
 #include <iostream>
 #ifndef EMFKACSOLVER
 #define EMFKACSOLVER
+extern void MCinCUDA(int deviceId,int texMode,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
+                    double* X_tau_lin_1,double* X_tau_lin_2, double* Y_tau_lin,double* Z_tau_lin,
+                    double* X_tau_sublin_1,double* X_tau_sublin_2, double* Y_tau_sublin,double* Z_tau_sublin)
 enum sumindex
 {   ScoreLinear = 0,
     ScoreSublinear = 1,
@@ -205,6 +208,48 @@ public:
                 RNGcallsv[n] = RNGCalls_thread;
             }
             #pragma omp barrier
+        }
+    }
+    void Simulate_CUDA(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
+                   double rho, bvp BoundaryValueProblem, double *boundary_parameters)
+    {   
+        double *X_tau_lin_1, *X_tau_lin_2,*Y_tau_lin_array, *Z_tau_lin_array, *X_tau_sublin_1, *X_tau_sublin_2,
+               *Y_tau_sublin_array, *Z_tau_sublin_array;
+        X_tau_lin_1 = new double[N_tray];
+        X_tau_lin_2 = new double[N_tray];
+        Y_tau_lin_array = new double[N_tray];
+        Z_tau_lin_array = new double[N_tray];
+        X_tau_sublin_1 = new double[N_tray];
+        X_tau_sublin_2 = new double[N_tray];
+        Y_tau_sublin_array = new double[N_tray];
+        Z_tau_sublin_array = new double[N_tray];
+        MCinCUDA(0,0,X0,INFINITY, boundary_parameters, time_discretization,(long long int) N_tray, 0, 0, 0,
+                    X_tau_lin_1, X_tau_lin_2, Y_tau_lin_array, Z_tau_lin_array,
+                    X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin_array, Z_tau_sublin_array);
+        X_tau_lin.resize(N_tray);
+        Y_tau_lin.resize(N_tray);
+        Z_tau_lin.resize(N_tray);
+        tau_lin.resize(N_tray);
+        xi_lin.resize(N_tray);
+        X_tau_sublin.resize(N_tray);
+        Y_tau_sublin.resize(N_tray);
+        Z_tau_sublin.resize(N_tray);
+        tau_sublin.resize(N_tray);
+        xi_sublin.resize(N_tray);
+        RNGcallsv.resize(N_tray);
+        threads.resize(N_tray);
+        Eigen::Vector2d aux_vec;
+        for(unsigned int trayectoy_index = 0; trayectoy_index < N_tray; trayectoy_index ++){
+            aux_vec(0) = X_tau_lin_1[trayectoy_index];
+            aux_vec(1) = X_tau_lin_2[trayectoy_index];
+            X_tau_lin[trayectoy_index] = aux_vec;
+            Y_tau_lin[trayectoy_index] = Y_tau_lin_array[trayectoy_index];
+            Z_tau_lin[trayectoy_index] = Y_tau_lin_array[trayectoy_index];
+            aux_vec(0) = X_tau_sublin_1[trayectoy_index];
+            aux_vec(1) = X_tau_sublin_2[trayectoy_index];
+            X_tau_sublin[trayectoy_index] = aux_vec;
+            Y_tau_sublin[trayectoy_index] = Y_tau_sublin_array[trayectoy_index];
+            Z_tau_sublin[trayectoy_index] = Y_tau_sublin_array[trayectoy_index];
         }
     }
     void Simulate_OMP(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
@@ -635,6 +680,13 @@ public:
     void Solve_OMP_Analytic(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
                    double rho, bvp BoundaryValueProblem, double *boundary_parameters){
         Simulate_OMP(X0,N_tray,time_discretization,rho,BoundaryValueProblem,boundary_parameters);
+        Reduce_Analytic(BoundaryValueProblem, N_tray);
+        Update();
+    }
+    void Solve_CUDA_Analytic(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
+                   double rho, bvp BoundaryValueProblem, double *boundary_parameters){
+        
+        Simulate_CUDA();
         Reduce_Analytic(BoundaryValueProblem, N_tray);
         Update();
     }

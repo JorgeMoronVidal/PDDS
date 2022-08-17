@@ -243,6 +243,8 @@ class PDDSparseGM{
        void Solve(bvp BoundValProb, std::string file);
        /*Solves the problem given by the configuration file*/
        void Solve(bvp BoundValProb); 
+       /*Solves the problem given by the configuration file*/
+       void Solve_CUDA(bvp BoundValProb); 
         /*Prints the problem parameters on screen*/
        void Print_Problem(void); 
        /*Prints the content of the Interface vector on screen*/

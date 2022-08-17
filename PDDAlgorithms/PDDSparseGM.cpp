@@ -575,6 +575,7 @@ void PDDSparseGM::Fullfill_interfaces(void){
     }
     //getchar();
 }
+
 void PDDSparseGM::Solve(bvp BoundValProb){
     bool done=true;
     //double start = MPI_Wtime();
@@ -689,6 +690,143 @@ void PDDSparseGM::Solve(bvp BoundValProb){
                 solver.Reset_sums();
                 solver.N = 0;
                 solver.Solve_OMP_Analytic(X0,(unsigned int) N,h0, 0.1,
+                BoundValProb, stencil, c2, G_temp,G_var_temp,G_j_temp,B_temp,
+                BB_temp);
+                B.push_back(B_temp);
+                B_i.push_back(indexes[knot]);
+                B_var.push_back(B_temp*B_temp - BB_temp);
+                for(unsigned int k = 0;k < G_temp.size(); k ++){
+                    G_i.push_back(indexes[knot]);
+                    G_j.push_back(G_j_temp[k]);
+                    G.push_back(G_temp[k]);
+                    G_var.push_back(G_var_temp[k]);
+                }
+                //knot_end = MPI_Wtime();
+                
+            }
+        }
+        std::cout << "OUT \n";
+        Send_G_B();
+        //Compute_B_Deterministic();
+        //double end = MPI_Wtime();
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Finalize();
+}
+void PDDSparseGM::Solve_CUDA(bvp BoundValProb){
+    bool done=true;
+    //double start = MPI_Wtime();
+    if(myid==server) Print_Problem();
+    //Compute the PDDSparse Matrix
+    if(myid==server){
+        FILE *pFile;
+        pFile = fopen("Output/Debug/times.txt","a");
+        fprintf(pFile,"************WARMING UP***********\n");
+        fclose(pFile);
+        std::vector<int> aux_vec;
+        std::vector<Eigen::Vector2d> positions;
+        std::vector<int> indexes;
+        aux_vec.resize(2);
+        for(int Iy = 0; Iy <= 2*iN[1]-2; Iy ++){
+            if(Iy%2 == 0){
+                for(int Ix = 0; Ix <= iN[0]-2; Ix ++){
+                    aux_vec[0] = Ix;
+                    aux_vec[1] = Iy;
+                    if(Iy == 0){
+                        indexes.assign(interfaces[interface_map[aux_vec]].index.begin(),
+                        interfaces[interface_map[aux_vec]].index.end());
+                        positions.assign(interfaces[interface_map[aux_vec]].position.begin(),
+                        interfaces[interface_map[aux_vec]].position.end());
+                    } else {
+                        indexes.assign(interfaces[interface_map[aux_vec]].index.begin()+1,
+                        interfaces[interface_map[aux_vec]].index.end());
+                        positions.assign(interfaces[interface_map[aux_vec]].position.begin()+1,
+                        interfaces[interface_map[aux_vec]].position.end());
+                    }
+                    std::cout << "Sending interface [" << aux_vec[0] << ","<< aux_vec[1] << "]"<< std::endl;
+                    Send_Interface(positions, indexes);
+                    //Send_Stencil_Data(indexes[0]);
+                    std::cout << "Interface [" << aux_vec[0] << ","<< aux_vec[1] << "] sent"<< std::endl;
+                }
+            } else {
+                for(int Ix = 0; Ix <= iN[0]-1; Ix ++){
+                    aux_vec[0] = Ix;
+                    aux_vec[1] = Iy;
+                    if(Ix == 0){
+                        indexes.assign(interfaces[interface_map[aux_vec]].index.begin(),
+                        interfaces[interface_map[aux_vec]].index.end()-1);
+                        positions.assign(interfaces[interface_map[aux_vec]].position.begin(),
+                        interfaces[interface_map[aux_vec]].position.end()-1);
+                    } else {
+                        if(Ix == iN[0]-1){
+                            indexes.assign(interfaces[interface_map[aux_vec]].index.begin()+1,
+                            interfaces[interface_map[aux_vec]].index.end());
+                            positions.assign(interfaces[interface_map[aux_vec]].position.begin()+1,
+                            interfaces[interface_map[aux_vec]].position.end());
+                        }else{
+                            indexes.assign(interfaces[interface_map[aux_vec]].index.begin()+1,
+                            interfaces[interface_map[aux_vec]].index.end()-1);
+                            positions.assign(interfaces[interface_map[aux_vec]].position.begin()+1,
+                            interfaces[interface_map[aux_vec]].position.end()-1);
+                        }
+                    }
+                    std::cout << "Sending interface [" << aux_vec[0] << ","<< aux_vec[1] << "]"<< std::endl;
+                    Send_Interface(positions, indexes);
+                    //Send_Stencil_Data(indexes[0]);
+                    std::cout << "Interface [" << aux_vec[0] << ","<< aux_vec[1] << "] sent"<< std::endl;
+                }
+                
+            }
+        }
+        Update_TimeFile("MC Simulations",server+1);
+        //G and B are received from the workers
+        #ifdef LOCAL_SERVERS
+        #else
+        for(int process = 0; process < server; process++){
+             Receive_G_B();
+        }
+        Update_TimeFile("Receiving G and B",server+1);
+        B.clear();
+        B_i.clear();
+        #endif
+        //Compute_B_Deterministic();
+        Compute_Solution(BoundValProb);
+        //system("octave-cli SmoothingSplines/SmoothingSplines.m");
+        //pFile = fopen(debug_fname,"a");
+        //double end = MPI_Wtime();
+    } else {
+        //Start and end time for the node
+        //double knot_start, knot_end;
+        //G and B storage vectors for each node
+        double B_temp, BB_temp;
+        std::vector<double> G_temp, G_var_temp, x, y;
+        std::vector<int>  G_j_temp, indexes;
+        Eigen::Vector2d X0;
+        //Stencil
+        Stencil stencil;
+        EMFKACSolver solver;
+        c2 = pow(fac*(1.0/(nN[0]-1)),2.0);
+        G_i.clear();G_j.clear(); G.clear(); G_CT.clear(); G_var_temp.clear(); 
+        B.clear();B_CT.clear();B_i.clear();B_var.clear(); G_var.clear();
+        while(! Receive_Interface(x,y,indexes)){
+            //stencil.Print(indexes[0]);
+            std::cout << "Interface received"<< std::endl;
+            for(unsigned int knot = 0; knot < x.size(); knot ++){
+                //knot_start = MPI_Wtime();
+                stencil = Compute_Stencil(indexes[knot]);
+                stencil.Compute_ipsi(BoundValProb,c2,debug_fname);
+                for(int i = 0; i < 4; i++) stencil.global_parameters[i] = parameters[i];
+                std::cout << "Solving knot " << indexes[knot] << std::endl;
+                B_temp = 0.0;
+                BB_temp = 0.0;
+                G_j_temp.clear();
+                G_temp.clear();
+                G_var_temp.clear();
+                X0(0) = x[knot]; X0(1) = y[knot];
+                stencil.Reset();
+                solver.Reset_sums();
+                solver.N = 0;
+                solver.Solve_CUDA_Analytic(X0,(unsigned int) N,h0, 0.1,
                 BoundValProb, stencil, c2, G_temp,G_var_temp,G_j_temp,B_temp,
                 BB_temp);
                 B.push_back(B_temp);
