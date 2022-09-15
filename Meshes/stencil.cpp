@@ -150,7 +150,7 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
                 if(lu.isInvertible()){
                     iPsi = lu.inverse();
                     cond = Psi.norm()*iPsi.norm();
-                    if(cond < 5E+9) c2 += (sten_position[1]-sten_position[0]).norm()* 0.05;//(1.0*std::rand()/RAND_MAX);
+                    if(cond < 5E+9) c2 += c2* 0.5;//(1.0*std::rand()/RAND_MAX);
                     if(cond > 5E+10){
                         if(c2 < 1.0){
                             c2 = c2*c2;
@@ -158,7 +158,7 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
                             c2 = sqrt(c2)-0.001;
                         }
                     }
-                    //std::cout << "c2 is " <<  c2 << "\t Cond is" << cond << std::endl;
+                    std::cout << "COND " << cond << " c2 " << c2 << std::endl;
                 }else{
                     //printf("FATAL ERROR: Psi Matrix is not invertible.\n");
                     iPsi = Psi*0.0;
@@ -189,7 +189,8 @@ bool Stencil::AreSame(double a, double b)
 }
 
 void Stencil::Compute_ipsi(bvp boundvalprob, double c2, char debug_fname[256]){
-	if(pos_north.size() > 0){
+	 
+    if(pos_north.size() > 0){
         c2_north = c2;
 		ipsi_north = Compute_ipsi(pos_north, boundvalprob, c2_north, debug_fname);
 	}
@@ -205,6 +206,7 @@ void Stencil::Compute_ipsi(bvp boundvalprob, double c2, char debug_fname[256]){
         c2_west = c2;
 		ipsi_west = Compute_ipsi(pos_west, boundvalprob, c2_west, debug_fname);
 	}
+        std::cout << "HERE I AM \n";
 }
 
 int Stencil::G_update(Eigen::Vector2d X, double Y, bvp boundvalprob, double c2){

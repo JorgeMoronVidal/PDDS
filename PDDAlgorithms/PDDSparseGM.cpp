@@ -676,6 +676,7 @@ void PDDSparseGM::Solve(bvp BoundValProb){
             std::cout << "Interface received"<< std::endl;
             for(unsigned int knot = 0; knot < x.size(); knot ++){
                 //knot_start = MPI_Wtime();
+               
                 stencil = Compute_Stencil(indexes[knot]);
                 stencil.Compute_ipsi(BoundValProb,c2,debug_fname);
                 for(int i = 0; i < 4; i++) stencil.global_parameters[i] = parameters[i];
@@ -1870,6 +1871,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
     }
     Stencil output;
     output.Init(s_index,s_x,s_y,s_params);
+
     return output;
 }
 Stencil PDDSparseGM::Recieve_Stencil_Data(void){

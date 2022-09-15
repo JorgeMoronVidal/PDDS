@@ -8,7 +8,7 @@
 #define EMFKACSOLVER
 extern void MCinCUDA(int deviceId,int texMode,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
                     double* X_tau_lin_1,double* X_tau_lin_2, double* Y_tau_lin,double* Z_tau_lin,
-                    double* X_tau_sublin_1,double* X_tau_sublin_2, double* Y_tau_sublin,double* Z_tau_sublin)
+                    double* X_tau_sublin_1,double* X_tau_sublin_2, double* Y_tau_sublin,double* Z_tau_sublin);
 enum sumindex
 {   ScoreLinear = 0,
     ScoreSublinear = 1,
@@ -132,7 +132,7 @@ public:
 
             #pragma omp for
             for(unsigned int n = 0; n < N_tray; n++){
-                //std::cout << n  << " " << id << std::endl;
+                std::cout << n  << " " << id << std::endl;
                 X = X0;
                 Y = 1;
                 Z = 0;
@@ -223,7 +223,7 @@ public:
         X_tau_sublin_2 = new double[N_tray];
         Y_tau_sublin_array = new double[N_tray];
         Z_tau_sublin_array = new double[N_tray];
-        MCinCUDA(0,0,X0,INFINITY, boundary_parameters, time_discretization,(long long int) N_tray, 0, 0, 0,
+        MCinCUDA(0,0,3,X0,INFINITY, boundary_parameters, time_discretization,(long long int) N_tray, 0, 0, 0,
                     X_tau_lin_1, X_tau_lin_2, Y_tau_lin_array, Z_tau_lin_array,
                     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin_array, Z_tau_sublin_array);
         X_tau_lin.resize(N_tray);
@@ -684,11 +684,23 @@ public:
         Update();
     }
     void Solve_CUDA_Analytic(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
-                   double rho, bvp BoundaryValueProblem, double *boundary_parameters){
+                   double rho, bvp BoundaryValueProblem,  Stencil & stencil_knot, double c2, 
+                   std::vector<double>& G, std::vector<double>& G_var, std::vector<int> &G_j,
+                   double & B, double & BB){
+        double stencil_parameters[4] = {stencil_knot.stencil_parameters[0],stencil_knot.stencil_parameters[1],
+               stencil_knot.stencil_parameters[2],stencil_knot.stencil_parameters[3]},
+               boundary_parameters[4] = {stencil_knot.global_parameters[0],stencil_knot.global_parameters[1],
+               stencil_knot.global_parameters[2],stencil_knot.global_parameters[3]};
+        Eigen::Vector2d aux1,aux2;
+        if(fabs(BoundaryValueProblem.distance(boundary_parameters,X0,aux1,aux2))>1E-08){
+            Simulate_CUDA(X0,N_tray,time_discretization,rho,BoundaryValueProblem,stencil_parameters);
+            Reduce_Analytic(BoundaryValueProblem, N_tray, stencil_knot,c2,G,G_var,G_j,B, BB);
+            Update();
+        }else{
+            B = BoundaryValueProblem.g(X0,0.0);
+            BB = B*B;
+        }
         
-        Simulate_CUDA();
-        Reduce_Analytic(BoundaryValueProblem, N_tray);
-        Update();
     }
     void Solve_OMP_Analytic(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
                    double rho, bvp BoundaryValueProblem, Stencil & stencil_knot, double c2, 

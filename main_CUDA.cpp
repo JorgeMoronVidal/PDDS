@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
     std::string config("configuration.txt");
     PDDSparseGM PDDS(argc,argv,config);
     //First iteration
-    PDDS.Solve(boundvalprob);
+    PDDS.Solve_CUDA(boundvalprob);
     //PDDS.Solve_Subdomains_LinIt_First(boundvalprob);
     //Following iterations
     //for(int i = 0; i < 10; i++){

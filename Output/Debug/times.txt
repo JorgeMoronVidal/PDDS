@@ -1,24 +1,23 @@
 task,total_tike,task_time,N_process
-Reading configuration File,9.506459e-04,9.490942e-04,5
-Fullfilling interfaces,8.184117e-03,7.233471e-03,1
+Reading configuration File,4.305654e-04,4.299872e-04,5
+Fullfilling interfaces,1.430412e-03,9.998461e-04,1
 ************WARMING UP***********
-MC Simulations,4.854954e+01,4.854136e+01,5
-Receiving G and B,5.108710e+01,2.537555e+00,5
-Building Up G and B,5.114442e+01,5.731839e-02,1
-Solving system,5.117188e+01,2.746300e-02,1
-Writing Solution,5.122812e+01,5.623671e-02,1
-Fullfilling subdomains,5.275842e+01,1.530306e+00,1
-Solving subdomains,5.392053e+01,1.162102e+00,5
-Iteration begins,5.392059e+01,6.874505e-05,1
-Copying files,5.395259e+01,3.199208e-02,1
-MC Simulations VR,9.023031e+01,3.627772e+01,5
-Receiving G, B and Metadata,9.283780e+01,2.607497e+00,5
-Building Up G and B,9.289548e+01,5.767707e-02,1
-Solving system,9.291994e+01,2.446037e-02,1
-Writing Solution,9.297668e+01,5.673978e-02,1
-Processing metadata,9.298492e+01,8.242564e-03,1
-Smoothing splines,9.480868e+01,1.823754e+00,1
-FullfillinFullfill_subg subdomains,9.483068e+01,2.199925e-02,1
-Solving subdomains,9.628808e+01,1.457401e+00,5
-Iteration begins,9.628816e+01,8.240913e-05,1
-Copying files,9.631782e+01,2.965994e-02,1
+MC Simulations,1.911950e+01,1.911807e+01,5
+Receiving G and B,2.672817e+01,7.608672e+00,5
+Building Up G and B,2.674271e+01,1.454481e-02,1
+Solving system,2.674403e+01,1.312557e-03,1
+Writing Solution,2.674915e+01,5.121185e-03,1
+Fullfilling subdomains,2.675844e+01,9.294887e-03,1
+Solving subdomains,2.740630e+01,6.478572e-01,5
+Iteration begins,2.740638e+01,8.435181e-05,1
+Copying files,2.746206e+01,5.567724e-02,1
+MC Simulations VR,5.046923e+01,2.300716e+01,5
+Receiving G, B and Metadata,5.637478e+01,5.905555e+00,5
+Building Up G and B,5.637788e+01,3.101366e-03,1
+Solving system,5.637800e+01,1.188881e-04,1
+Writing Solution,5.638083e+01,2.824531e-03,1
+Processing metadata,5.638261e+01,1.783215e-03,1
+FullfillinFullfill_subg subdomains,5.638498e+01,2.374533e-03,1
+Solving subdomains,5.699230e+01,6.073133e-01,5
+Iteration begins,5.699241e+01,1.126023e-04,1
+Copying files,5.702448e+01,3.207256e-02,1

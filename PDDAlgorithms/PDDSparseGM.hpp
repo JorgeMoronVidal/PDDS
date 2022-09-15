@@ -2,7 +2,7 @@
 #ifndef PDDSPARSEGM
 #define PDDSPARSEGM
 //Fraction of the interface the stencil is elongated
-#define STEN_ELONG 0.5
+#define STEN_ELONG 0.0
 //Minimum value of N
 #define N_min 500
 //Minimum value of h
@@ -69,7 +69,7 @@
 //Interfaces
 #define INTERSECTIONS_YES
 //Stencil 
-#define SQUARE_PATCHES
+//#define SQUARE_PATCHES
 //MPI Implementation
 //#define LOCAL_SERVERS
 #include "../Solvers/EMFKACSolver.hpp"
