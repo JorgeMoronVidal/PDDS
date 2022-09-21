@@ -18,7 +18,8 @@
 #include "SolveLoop.cuh"
 #define NUMBLOCKS 128
 #define BLOCKSIZE 256
-
+__device__     curandStateMtgp32* dev_curand_states;
+__device__    mtgp32_kernel_params *devKernelParams;
 #define ERROR_CHECK(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
@@ -27,6 +28,14 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
       fprintf(stderr,"GPUassert: %s %s %dn", cudaGetErrorString(code), file, line);
       if (abort) exit(code);
    }
+}
+
+__host__ void initRNGCuda(int seed){
+  cudaMalloc((void**)&dev_curand_states, NUMBLOCKS*sizeof(curandStateMtgp32));
+  cudaMalloc((void**)&devKernelParams, sizeof(mtgp32_kernel_params));
+  curandMakeMTGP32Constants(mtgp32dc_params_fast_11213, devKernelParams);
+  curandMakeMTGP32KernelState(dev_curand_states, mtgp32dc_params_fast_11213, devKernelParams,NUMBLOCKS, seed);
+
 }
 
 template <typename Typef,typename Typec>
@@ -39,9 +48,6 @@ __host__ void SolveCUDA(int seed,Eigen::Vector2d X0,double T, double* boundary_p
     cudaEventCreate(&stop);
     float milliseconds=0;
     float time;
-    //RNG
-    curandStateMtgp32* dev_curand_states;
-    mtgp32_kernel_params *devKernelParams;
     //Time discretization of the trajectories and initial time of the trajectory T
     double sqrth= sqrt(h);
     double time_discretization=h,rho=0.2;
@@ -70,11 +76,6 @@ __host__ void SolveCUDA(int seed,Eigen::Vector2d X0,double T, double* boundary_p
  cudaMalloc((void**) &d_xi,2*NUMBLOCKS*BLOCKSIZE*sizeof(double));
  cudaMalloc((void**) &d_ji_t,2*NUMBLOCKS*BLOCKSIZE*sizeof(double));
 //Bucle en N_tray
-//Init cuRAND dev_curand_states
-  cudaMalloc((void**)&dev_curand_states, NUMBLOCKS*sizeof(curandStateMtgp32));
-  cudaMalloc((void**)&devKernelParams, sizeof(mtgp32_kernel_params));
-  curandMakeMTGP32Constants(mtgp32dc_params_fast_11213, devKernelParams);
-  curandMakeMTGP32KernelState(dev_curand_states, mtgp32dc_params_fast_11213, devKernelParams,NUMBLOCKS, seed);
      //Malloc e iniciacion variables device
        //DSUMS
            cudaMalloc((void**) &d_sums, sizeSum*sizeof(double));
