@@ -6,7 +6,7 @@
 #include <iostream>
 #ifndef EMFKACSOLVER
 #define EMFKACSOLVER
-extern void MCinCUDA(int deviceId,int texMode,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
+extern void MCinCUDA(int deviceId, int initRNG, int texMode,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
                     double* X_tau_lin_1,double* X_tau_lin_2, double* Y_tau_lin,double* Z_tau_lin,
                     double* X_tau_sublin_1,double* X_tau_sublin_2, double* Y_tau_sublin,double* Z_tau_sublin);
 enum sumindex
@@ -223,7 +223,7 @@ public:
         X_tau_sublin_2 = new double[N_tray];
         Y_tau_sublin_array = new double[N_tray];
         Z_tau_sublin_array = new double[N_tray];
-        MCinCUDA(0,0,3,X0,INFINITY, boundary_parameters, time_discretization,(long long int) N_tray, 0, 0, 0,
+        MCinCUDA(0,1,0,3,X0,INFINITY, boundary_parameters, time_discretization,(long long int) N_tray, 0, 0, 0,
                     X_tau_lin_1, X_tau_lin_2, Y_tau_lin_array, Z_tau_lin_array,
                     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin_array, Z_tau_sublin_array);
         X_tau_lin.resize(N_tray);
