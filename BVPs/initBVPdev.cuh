@@ -1,6 +1,6 @@
 #include <iostream>
 #include <eigen3/Eigen/Core>
-#include <BVPs/BVP.cuh>
+#include <BVP.cuh>
 #include "Domains/rectangle.cuh"
 #include "EDPs/Monegros_Poisson.hpp"
 __device__ bvpdev initBVPdev(void){
