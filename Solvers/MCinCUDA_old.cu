@@ -53,7 +53,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit,int texMode,  int firstArrType, 
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (firstArrType) {
     case 0:
-      Init_tex_LUT(Nx,Ny,firstArr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,firstArr,tex_f, cuArray_f);
    break;
 case 1:
       Init_tex_LUT(Nx,Ny,firstArr,tex_c, cuArray_c);
@@ -95,7 +95,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit, int texMode, int firstArrType, 
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (firstArrType) {
     case 0:
-      Init_tex_LUT(Nx,Ny,firstArr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,firstArr,tex_f, cuArray_f);
       Init_tex_LUT(Nx,Ny,secArr,tex_c, cuArray_c);
     break;
 case 1:
@@ -133,7 +133,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit, float* f_arr, float* c_arr, flo
   cudaSetDevice(deviceId);if (RNGinit==0){initRNGCuda(seed);}
   pfscalar g;
   cudaMemcpyFromSymbol( &g, g_, sizeof(pfscalar));
-      Init_tex_LUT(Nx,Ny,f_arr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,f_arr,tex_f, cuArray_f);
       Init_tex_LUT(Nx,Ny,c_arr,tex_c, cuArray_c);
     Init_tex_LUT(Nx,Ny,ux_arr,tex_ux, cuArray_ux);
     Init_tex_LUT(Nx,Ny,uy_arr,tex_uy, cuArray_uy);
@@ -197,7 +197,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit, int texMode, int firstArrType, 
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (firstArrType) {
     case 0:
-      Init_tex_LUT(Nx,Ny,firstArr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,firstArr,tex_f, cuArray_f);
    break;
 case 1:
       Init_tex_LUT(Nx,Ny,firstArr,tex_c, cuArray_c);
@@ -246,7 +246,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit, int texMode, int firstArrType, 
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (firstArrType) {
     case 0:
-      Init_tex_LUT(Nx,Ny,firstArr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,firstArr,tex_f, cuArray_f);
       Init_tex_LUT(Nx,Ny,secArr,tex_c, cuArray_c);
     break;
 case 1:
@@ -291,7 +291,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit, float* f_arr, float* c_arr, flo
   cudaSetDevice(deviceId);if (RNGinit==0){initRNGCuda(seed);}
   pfscalar g;
   cudaMemcpyFromSymbol( &g, g_, sizeof(pfscalar));
-      Init_tex_LUT(Nx,Ny,f_arr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,f_arr,tex_f, cuArray_f);
       Init_tex_LUT(Nx,Ny,c_arr,tex_c, cuArray_c);
     Init_tex_LUT(Nx,Ny,ux_arr,tex_ux, cuArray_ux);
     Init_tex_LUT(Nx,Ny,uy_arr,tex_uy, cuArray_uy);
@@ -302,7 +302,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit, float* f_arr, float* c_arr, flo
 ////
 //XYZ MODE
 __host__ void MCinCUDA(int deviceId,int RNGinit,int texMode, int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
-                        double*   X_tau_lin_1, double*  X_tau_lin_2, double*  Y_tau_lin, double*  Z_tau_lin){
+                        double* phi, double* phi2, double* phi3, double* phi4, double* phixi, double* phi_plus_xi2, double* xi, double* xi2, double* tau, double* tau2){
   cudaSetDevice(deviceId);if (RNGinit==0){initRNGCuda(seed);}
   pfscalar g;
   cudaMemcpyFromSymbol( &g, g_, sizeof(pfscalar));
@@ -312,23 +312,23 @@ __host__ void MCinCUDA(int deviceId,int RNGinit,int texMode, int seed,Eigen::Vec
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (texMode) {
     case 0:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, c, VARC,
                             X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 1:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, c, VARC,
                            X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 2:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, tex_c, VARC,
                            X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
         break;
 case 3:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC,
                                                    X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 4:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
    X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 
@@ -338,7 +338,7 @@ case 4:
 
 
 __host__ void MCinCUDA(int deviceId,int RNGinit,int texMode,  int firstArrType, float* firstArr,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
-                        double*   X_tau_lin_1, double*  X_tau_lin_2, double*  Y_tau_lin, double*  Z_tau_lin) {
+                        double* phi, double* phi2, double* phi3, double* phi4, double* phixi, double* phi_plus_xi2, double* xi, double* xi2, double* tau, double* tau2) {
   cudaSetDevice(deviceId);if (RNGinit==0){initRNGCuda(seed);}
   pfscalar g;
   cudaMemcpyFromSymbol( &g, g_, sizeof(pfscalar));
@@ -348,7 +348,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit,int texMode,  int firstArrType, 
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (firstArrType) {
     case 0:
-      Init_tex_LUT(Nx,Ny,firstArr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,firstArr,tex_f, cuArray_f);
    break;
 case 1:
       Init_tex_LUT(Nx,Ny,firstArr,tex_c, cuArray_c);
@@ -356,23 +356,23 @@ case 1:
   switch (texMode) {
     break;
 case 0:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, c, VARC,
                             X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 1:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, c, VARC,
                            X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 2:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, tex_c, VARC,
                            X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 3:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC,
                                                    X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 4:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
    X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 
@@ -380,7 +380,7 @@ case 4:
 }
 
 __host__ void MCinCUDA(int deviceId,int RNGinit, int texMode, int firstArrType, float* firstArr, float* secArr,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
-                        double*   X_tau_lin_1, double*  X_tau_lin_2, double*  Y_tau_lin, double*  Z_tau_lin){
+                        double* phi, double* phi2, double* phi3, double* phi4, double* phixi, double* phi_plus_xi2, double* xi, double* xi2, double* tau, double* tau2){
   cudaSetDevice(deviceId);if (RNGinit==0){initRNGCuda(seed);}
   pfscalar g;
   cudaMemcpyFromSymbol( &g, g_, sizeof(pfscalar));
@@ -390,7 +390,7 @@ __host__ void MCinCUDA(int deviceId,int RNGinit, int texMode, int firstArrType, 
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (firstArrType) {
     case 0:
-      Init_tex_LUT(Nx,Ny,firstArr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,firstArr,tex_f, cuArray_f);
       Init_tex_LUT(Nx,Ny,secArr,tex_c, cuArray_c);
     break;
 case 1:
@@ -400,23 +400,23 @@ case 1:
   switch (texMode) {
     break;
 case 0:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, c, VARC,
                             X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 1:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, c, VARC,
                            X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 2:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, tex_c, VARC,
                            X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 3:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC,
                                                    X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 case 4:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
    X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
     break;
 
@@ -424,15 +424,15 @@ case 4:
 }
 
 __host__ void MCinCUDA(int deviceId,int RNGinit, float* f_arr, float* c_arr, float* ux_arr,  float* uy_arr,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
-                        double*   X_tau_lin_1, double*  X_tau_lin_2, double*  Y_tau_lin, double*  Z_tau_lin){
+                        double* phi, double* phi2, double* phi3, double* phi4, double* phixi, double* phi_plus_xi2, double* xi, double* xi2, double* tau, double* tau2){
   cudaSetDevice(deviceId);if (RNGinit==0){initRNGCuda(seed);}
   pfscalar g;
   cudaMemcpyFromSymbol( &g, g_, sizeof(pfscalar));
-      Init_tex_LUT(Nx,Ny,f_arr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,f_arr,tex_f, cuArray_f);
       Init_tex_LUT(Nx,Ny,c_arr,tex_c, cuArray_c);
     Init_tex_LUT(Nx,Ny,ux_arr,tex_ux, cuArray_ux);
     Init_tex_LUT(Nx,Ny,uy_arr,tex_uy, cuArray_uy);
-  SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
+  SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
                           X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin);
 }
 /////
@@ -451,27 +451,27 @@ __host__ void MCinCUDA(int deviceId,int RNGinit,int texMode,int seed,Eigen::Vect
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (texMode) {
     case 0:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, c, VARC,
                             X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
                            X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 1:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 2:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, tex_c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 3:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 4:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
@@ -492,7 +492,7 @@ double* X_tau_lin_1,double* X_tau_lin_2, double* Y_tau_lin,double* Z_tau_lin,
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (firstArrType) {
     case 0:
-      Init_tex_LUT(Nx,Ny,firstArr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,firstArr,tex_f, cuArray_f);
    break;
 case 1:
       Init_tex_LUT(Nx,Ny,firstArr,tex_c, cuArray_c);
@@ -501,27 +501,27 @@ case 1:
   }
   switch (texMode) {
     case 0:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 1:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 2:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, tex_c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 3:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 4:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
@@ -541,7 +541,7 @@ double* X_tau_lin_1,double* X_tau_lin_2, double* Y_tau_lin,double* Z_tau_lin,
   cudaMemcpyFromSymbol( &c, c_, sizeof(pfscalar));
   switch (firstArrType) {
     case 0:
-      Init_tex_LUT(Nx,Ny,firstArr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,firstArr,tex_f, cuArray_f);
       Init_tex_LUT(Nx,Ny,secArr,tex_c, cuArray_c);
     break;
 case 1:
@@ -552,27 +552,27 @@ case 1:
   }
   switch (texMode) {
     case 0:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 1:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 2:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, f, tex_c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 3:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
 case 4:
-    SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
+    SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
      X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
     break;
@@ -586,11 +586,11 @@ double* X_tau_lin_1,double* X_tau_lin_2, double* Y_tau_lin,double* Z_tau_lin,
   cudaSetDevice(deviceId);if (RNGinit==0){initRNGCuda(seed);}
   pfscalar g;
   cudaMemcpyFromSymbol( &g, g_, sizeof(pfscalar));
-      Init_tex_LUT(Nx,Ny,f_arr,  tex_f, cuArray_f);
+      Init_tex_LUT(Nx,Ny,f_arr,tex_f, cuArray_f);
       Init_tex_LUT(Nx,Ny,c_arr,tex_c, cuArray_c);
     Init_tex_LUT(Nx,Ny,ux_arr,tex_ux, cuArray_ux);
     Init_tex_LUT(Nx,Ny,uy_arr,tex_uy, cuArray_uy);
-  SolveCUDA(X0,T, boundary_parameters, h, N_tray, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
+  SolveCUDA(X0,T, boundary_parameters, h, N_tray, g, Nx, Ny, tex_f, tex_c, VARC, tex_ux, tex_uy,
    X_tau_lin_1, X_tau_lin_2, Y_tau_lin, Z_tau_lin,
   X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin, Z_tau_sublin);
 }////
