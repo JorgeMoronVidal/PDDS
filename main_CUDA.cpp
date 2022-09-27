@@ -7,13 +7,13 @@ int main(int argc, char *argv[]){
     //BoundaryValueProblem Definition
     bvp boundvalprob;
     boundvalprob.u = Equation_u;
-    boundvalprob.g = EquationLI_g;
-    boundvalprob.f = EquationLI_f;
+    boundvalprob.g = Equation_g;
+    boundvalprob.f = Equation_f;
     boundvalprob.gradient = Equation_grad;
-    boundvalprob.sigma = EquationLI_sigma;
+    boundvalprob.sigma = Equation_sigma;
     boundvalprob.distance = Rectangle2D;
     boundvalprob.absorbing = Stopping;
-    boundvalprob.c = EquationLI_c;
+    boundvalprob.c = Equation_c;
     //boundvalprob.gradient = Equation_grad;
     std::string config("configuration.txt");
     PDDSparseGM PDDS(argc,argv,config);
