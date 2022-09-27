@@ -223,7 +223,7 @@ public:
         X_tau_sublin_2 = new double[N_tray];
         Y_tau_sublin_array = new double[N_tray];
         Z_tau_sublin_array = new double[N_tray];
-        MCinCUDA(0,0,0,3,X0,INFINITY, boundary_parameters, time_discretization,(long long int) N_tray, 0, 0, 0,
+        MCinCUDA(0,0,0,3,X0,INFINITY, boundary_parameters, time_discretization,(long long int) N_tray, 0, 0, false,
                     X_tau_lin_1, X_tau_lin_2, Y_tau_lin_array, Z_tau_lin_array,
                     X_tau_sublin_1, X_tau_sublin_2, Y_tau_sublin_array, Z_tau_sublin_array);
         X_tau_lin.resize(N_tray);
