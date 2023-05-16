@@ -1,0 +1,9 @@
+task,total_tike,task_time,N_process
+Reading configuration File,7.093369e-05,7.081369e-05,4
+Fullfilling interfaces,1.592282e-04,8.829449e-05,1
+************WARMING UP***********
+MC Simulations,9.881937e+02,9.881936e+02,4
+Receiving G and B,1.276778e+03,2.885838e+02,4
+Building Up G and B,1.276861e+03,8.293559e-02,1
+Solving system,1.276863e+03,2.652294e-03,1
+Writing Solution,1.276866e+03,2.400967e-03,1

@@ -1,0 +1,12 @@
+**********PDDSparse Solver*************
+***************Ver 1.0******************
+***********Jorge Moron Vidal************
+**********jmoron@math.uc3m.es***********
+h0 = 1.000000e-03 	 T_start = inf
+Number of trayectories per knot 1000
+Number of trayectories per job 32676
+Number of subdomains/interfaces: 3 x 3 
+Number of knots per interface: 32
+Total number of knots: 372
+Position of South-West corner of the domain: (-25.00,-25.00)
+Position of North-East corner of the domain: (25.00,25.00)

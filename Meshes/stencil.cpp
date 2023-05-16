@@ -267,7 +267,9 @@ int Stencil::G_update(Eigen::Vector2d X, double Y, bvp boundvalprob, double c2){
 		}
 		return 1;
 	}
-	std::cout << "Something went wrong computing H.";
+	std::cout << "Something went wrong computing H.\n";
+    printf("[%f,%f,%f,%f] (%f,%f)\n",stencil_parameters[0],stencil_parameters[1],
+    stencil_parameters[2],stencil_parameters[3],X(0),X(1));
     getchar();
 	return 0;
 }
@@ -393,7 +395,9 @@ int Stencil::G_Test_update(Eigen::Vector2d X){
         for(unsigned int i = 0; i < G_east.size(); i++) G_east[i] = (double) index_east[i];
             return 1;
     }
-    std::cout << "Something went wrong computing H.";
+    std::cout << "Something went wrong computing H.\n";
+    printf("[%f,%f,%f,%f] (%f,%f)\n",stencil_parameters[0],stencil_parameters[1],
+    stencil_parameters[2],stencil_parameters[3],X(0),X(1));
     getchar();
     return 0;
 }

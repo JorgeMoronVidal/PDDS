@@ -1,11 +1,15 @@
 CUDA .o
-export PATH=/usr/local/cuda-11.6/bin${PATH:+:${PATH}}
-nvcc -o MCinCUDA.o -lineinfo -I /home/pdduser Solvers/MCinCUDA.cu
---expt-relaxed-constexpr
+
+nvcc -c a.o -lineinfo -I /home/pdduser MCinCUDA.cu --expt-relaxed-constexpr
+
 
 MPIC++ exe
 
-mpicc -o main.o -fopenmp -g -lgsl -lgslcblas -lcudart -I /home/pdduser
-main_VR.cpp Meshes/subdomain.cpp Meshes/stencil.cpp Meshes/interface.cpp
-PDDAlgorithms/PDDSparseGM.cpp -lm
+mpicxx -o main main_CUDA.cpp Meshes/subdomain.cpp Meshes/stencil.cpp Meshes/interface.cpp PDDAlgorithms/PDDSparseGM.cpp Solvers/MCinCUDA.o -fopenmp -g -I/home/pdduser -lgsl -lgslcblas -lcudart -lcuda -lm
 
+
+execute program 
+
+debug: mpiexec -np 2 gdb ./main -ex run
+
+run: mpiexec -np 2 gdb ./main -ex run

@@ -6,9 +6,10 @@
 #include <iostream>
 #ifndef EMFKACSOLVER
 #define EMFKACSOLVER
-extern void MCinCUDA(int deviceId, int initRNG, int texMode,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
+/*extern void MCinCUDA(int deviceId, int initRNG, int texMode,int seed,Eigen::Vector2d X0,double T, double* boundary_parameters, double h,long long int N_tray, int Nx, int Ny, bool VARC,
                     double* X_tau_lin_1,double* X_tau_lin_2, double* Y_tau_lin,double* Z_tau_lin,
                     double* X_tau_sublin_1,double* X_tau_sublin_2, double* Y_tau_sublin,double* Z_tau_sublin);
+*/
 enum sumindex
 {   ScoreLinear = 0,
     ScoreSublinear = 1,
@@ -210,7 +211,7 @@ public:
             #pragma omp barrier
         }
     }
-    void Simulate_CUDA(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
+    /*void Simulate_CUDA(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
                    double rho, bvp BoundaryValueProblem, double *boundary_parameters)
     {   
         double *X_tau_lin_1, *X_tau_lin_2,*Y_tau_lin_array, *Z_tau_lin_array, *X_tau_sublin_1, *X_tau_sublin_2,
@@ -244,14 +245,14 @@ public:
             aux_vec(1) = X_tau_lin_2[trayectoy_index];
             X_tau_lin[trayectoy_index] = aux_vec;
             Y_tau_lin[trayectoy_index] = Y_tau_lin_array[trayectoy_index];
-            Z_tau_lin[trayectoy_index] = Y_tau_lin_array[trayectoy_index];
+            Z_tau_lin[trayectoy_index] = Z_tau_lin_array[trayectoy_index];
             aux_vec(0) = X_tau_sublin_1[trayectoy_index];
             aux_vec(1) = X_tau_sublin_2[trayectoy_index];
             X_tau_sublin[trayectoy_index] = aux_vec;
             Y_tau_sublin[trayectoy_index] = Y_tau_sublin_array[trayectoy_index];
-            Z_tau_sublin[trayectoy_index] = Y_tau_sublin_array[trayectoy_index];
+            Z_tau_sublin[trayectoy_index] = Z_tau_sublin_array[trayectoy_index];
         }
-    }
+    }*/
     void Simulate_OMP(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
                    double rho, bvp BoundaryValueProblem, double *boundary_parameters, gsl_spline2d *LUT_u,
                    gsl_interp_accel *xacc_u, gsl_interp_accel *yacc_u, gsl_spline2d *LUT_v,
@@ -518,7 +519,7 @@ public:
                 score_linear_nvr_thread, score_sublinear_nvr_thread,
                 score_linear_num_vr_thread,score_sublinear_num_vr_thread,
                 score_linear_num_nvr_thread, score_sublinear_num_nvr_thread, 
-                b = 0, bb = 0;
+                b = 0, bb = 0, Y=0, Z=0,g_avg = 0;
                 double stencil_parameters[4] = {stencil_knot.stencil_parameters[0],stencil_knot.stencil_parameters[1],
                 stencil_knot.stencil_parameters[2],stencil_knot.stencil_parameters[3]},
                 boundary_parameters[4] = {stencil_knot.global_parameters[0],stencil_knot.global_parameters[1],
@@ -529,6 +530,8 @@ public:
                 stencil_knot.Reset();
                 for(unsigned int n = 0; n<N_tray; n++){
                     //std::cout << n << std::endl;
+                    Y += Y_tau_lin[n];
+                    Z += Z_tau_sublin[n];
                     score_linear_nvr_thread = Z_tau_lin[n] + Y_tau_lin[n]*BoundaryValueProblem.g(X_tau_lin[n],tau_lin[n]);
                     score_sublinear_nvr_thread = Z_tau_sublin[n] + Y_tau_sublin[n]*BoundaryValueProblem.g(X_tau_sublin[n],tau_sublin[n]);
                     score_linear_vr_thread = score_linear_nvr_thread + xi_lin[n];
@@ -683,7 +686,7 @@ public:
         Reduce_Analytic(BoundaryValueProblem, N_tray);
         Update();
     }
-    void Solve_CUDA_Analytic(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
+    /*void Solve_CUDA_Analytic(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
                    double rho, bvp BoundaryValueProblem,  Stencil & stencil_knot, double c2, 
                    std::vector<double>& G, std::vector<double>& G_var, std::vector<int> &G_j,
                    double & B, double & BB){
@@ -701,7 +704,7 @@ public:
             BB = B*B;
         }
         
-    }
+    }*/
     void Solve_OMP_Analytic(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,
                    double rho, bvp BoundaryValueProblem, Stencil & stencil_knot, double c2, 
                    std::vector<double>& G, std::vector<double>& G_var, std::vector<int> &G_j,

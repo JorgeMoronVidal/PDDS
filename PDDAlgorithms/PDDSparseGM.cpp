@@ -714,7 +714,7 @@ void PDDSparseGM::Solve(bvp BoundValProb){
     MPI_Barrier(MPI_COMM_WORLD);
     //MPI_Finalize();
 }
-void PDDSparseGM::Solve_CUDA(bvp BoundValProb){
+/*void PDDSparseGM::Solve_CUDA(bvp BoundValProb){
     bool done=true;
     //double start = MPI_Wtime();
     if(myid==server) Print_Problem();
@@ -851,6 +851,7 @@ void PDDSparseGM::Solve_CUDA(bvp BoundValProb){
     MPI_Barrier(MPI_COMM_WORLD);
     //MPI_Finalize();
 }
+*/
 void PDDSparseGM::Solve_SemiLin(int iteration, bvp BoundValProb){
     bool done=true;
     //double start = MPI_Wtime();
