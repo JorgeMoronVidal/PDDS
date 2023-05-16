@@ -133,7 +133,7 @@ public:
 
             #pragma omp for
             for(unsigned int n = 0; n < N_tray; n++){
-                std::cout << n  << " " << id << std::endl;
+                //std::cout << n  << " " << id << std::endl;
                 X = X0;
                 Y = 1;
                 Z = 0;

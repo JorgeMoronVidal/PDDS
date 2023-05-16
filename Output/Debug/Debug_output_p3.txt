@@ -4,7 +4,7 @@
 **********jmoron@math.uc3m.es***********
 h0 = 1.000000e-03 	 T_start = inf
 Number of trayectories per knot 1000
-Number of trayectories per job 32676
+Number of trayectories per job 32612
 Number of subdomains/interfaces: 3 x 3 
 Number of knots per interface: 32
 Total number of knots: 372

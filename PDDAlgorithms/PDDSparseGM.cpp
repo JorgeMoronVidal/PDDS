@@ -606,10 +606,10 @@ void PDDSparseGM::Solve(bvp BoundValProb){
                         positions.assign(interfaces[interface_map[aux_vec]].position.begin()+1,
                         interfaces[interface_map[aux_vec]].position.end());
                     }
-                    std::cout << "Sending interface [" << aux_vec[0] << ","<< aux_vec[1] << "]"<< std::endl;
+                    //std::cout << "Sending interface [" << aux_vec[0] << ","<< aux_vec[1] << "]"<< std::endl;
                     Send_Interface(positions, indexes);
                     //Send_Stencil_Data(indexes[0]);
-                    std::cout << "Interface [" << aux_vec[0] << ","<< aux_vec[1] << "] sent"<< std::endl;
+                    //std::cout << "Interface [" << aux_vec[0] << ","<< aux_vec[1] << "] sent"<< std::endl;
                 }
             } else {
                 for(int Ix = 0; Ix <= iN[0]-1; Ix ++){
@@ -633,10 +633,10 @@ void PDDSparseGM::Solve(bvp BoundValProb){
                             interfaces[interface_map[aux_vec]].position.end()-1);
                         }
                     }
-                    std::cout << "Sending interface [" << aux_vec[0] << ","<< aux_vec[1] << "]"<< std::endl;
+                    //std::cout << "Sending interface [" << aux_vec[0] << ","<< aux_vec[1] << "]"<< std::endl;
                     Send_Interface(positions, indexes);
                     //Send_Stencil_Data(indexes[0]);
-                    std::cout << "Interface [" << aux_vec[0] << ","<< aux_vec[1] << "] sent"<< std::endl;
+                    //std::cout << "Interface [" << aux_vec[0] << ","<< aux_vec[1] << "] sent"<< std::endl;
                 }
                 
             }

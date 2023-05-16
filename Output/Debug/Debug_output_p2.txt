@@ -1,2 +1,1 @@
 nNodes is 372
-Processor 1685382481 ended sending its contribution to G and B
