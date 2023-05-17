@@ -668,19 +668,18 @@ void PDDSparseGM::Solve(bvp BoundValProb){
         //Stencil
         Stencil stencil;
         EMFKACSolver solver;
-        c2 = pow(fac*(1.0/(nN[0]-1)),2.0);
+        c2 = pow(3.6*32.0/nN[0],2.0);
         G_i.clear();G_j.clear(); G.clear(); G_CT.clear(); G_var_temp.clear(); 
         B.clear();B_CT.clear();B_i.clear();B_var.clear(); G_var.clear();
         while(! Receive_Interface(x,y,indexes)){
             //stencil.Print(indexes[0]);
-            std::cout << "Interface received"<< std::endl;
+            //std::cout << "Interface received"<< std::endl;
             for(unsigned int knot = 0; knot < x.size(); knot ++){
                 //knot_start = MPI_Wtime();
-               
                 stencil = Compute_Stencil(indexes[knot]);
                 stencil.Compute_ipsi(BoundValProb,c2,debug_fname);
                 for(int i = 0; i < 4; i++) stencil.global_parameters[i] = parameters[i];
-                std::cout << "Solving knot " << indexes[knot] << std::endl;
+                //std::cout << "Solving knot " << indexes[knot] << std::endl;
                 B_temp = 0.0;
                 BB_temp = 0.0;
                 G_j_temp.clear();

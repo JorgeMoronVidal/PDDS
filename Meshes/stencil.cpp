@@ -139,7 +139,7 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
         printf("FATAL ERROR: Psi Matrix is not invertible.");
         iPsi = Psi*0.0;
     }*/
-    do{
+    //do{
         for(unsigned int i = 0; i < sten_position.size(); i ++){
             for(unsigned int j = 0; j < sten_position.size(); j ++){
                 Psi(i,j) = boundvalprob.RBF(sten_position[i], sten_position[j], c2);
@@ -149,24 +149,24 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
             Eigen::FullPivLU<Eigen::MatrixXd> lu(Psi);
                 if(lu.isInvertible()){
                     iPsi = lu.inverse();
-                    cond = Psi.norm()*iPsi.norm();
-                    if(cond < 5E+9) c2 += c2* 0.5;//(1.0*std::rand()/RAND_MAX);
+                    //cond = Psi.norm()*iPsi.norm();
+                    /*if(cond < 5E+9) c2 += c2* 0.5;//(1.0*std::rand()/RAND_MAX);
                     if(cond > 5E+10){
                         if(c2 < 1.0){
                             c2 = c2*c2;
                         }else{
                             c2 = sqrt(c2)-0.001;
                         }
-                    }
-                    std::cout << "COND " << cond << " c2 " << c2 << std::endl;
+                    }*/
+                    //std::cout << "COND " << cond << " c2 " << c2 << std::endl;
                 }else{
-                    //printf("FATAL ERROR: Psi Matrix is not invertible.\n");
-                    iPsi = Psi*0.0;
-                    c2 = 0.5*c2;
-                    cond = 1E+20;
+                    printf("FATAL ERROR: Psi Matrix is not invertible.\n");
+                    //iPsi = Psi*0.0;
+                    //c2 = 0.5*c2;
+                    //cond = 1E+20;
                 }
-            }while((cond < 5E+9) || (cond > 5E+10));
-            printf("Condition number %f C2 %f\n",Psi.norm()*iPsi.norm(),c2);
+            //}while((cond < 5E+9) || (cond > 5E+10));
+            //printf("Condition number %f C2 %f\n",Psi.norm()*iPsi.norm(),c2);
     /*Eigen::BiCGSTAB<Eigen::MatrixXd> CGS;
     CGS.compute(Psi);
     iPsi = CGS.solveWithGuess(I,iPsi);
@@ -206,7 +206,7 @@ void Stencil::Compute_ipsi(bvp boundvalprob, double c2, char debug_fname[256]){
         c2_west = c2;
 		ipsi_west = Compute_ipsi(pos_west, boundvalprob, c2_west, debug_fname);
 	}
-        std::cout << "HERE I AM \n";
+        //std::cout << "HERE I AM \n";
 }
 
 int Stencil::G_update(Eigen::Vector2d X, double Y, bvp boundvalprob, double c2){
