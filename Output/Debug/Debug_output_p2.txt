@@ -1,1 +1,2 @@
-nNodes is 756
+nNodes is 165
+Processor 4 ended sending its contribution to G and B

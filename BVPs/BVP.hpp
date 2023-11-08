@@ -82,8 +82,9 @@ inline bool Default_Btype(Eigen::Vector2d position){
 }
 //Default Radial Basis Function inverse multiquadric
 inline double Default_RBF(Eigen::Vector2d X, Eigen::Vector2d X_j, double c){
-        return 1.0/sqrt(pow((X-X_j).norm(),2) + c);
-}
+        //return 1.0/sqrt(pow((X-X_j).norm(),2) + c);
+        return exp(-pow((X-X_j).norm(),2)/(c*c));
+}       
 /*This structure stores the functions that define a given BVP.*/
 struct bvp{
         //-u(Eigen::Vector2d position, double t) is the solution of the problem.

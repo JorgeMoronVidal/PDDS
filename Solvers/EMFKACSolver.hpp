@@ -1,6 +1,7 @@
 #include "../Integrators/FKACIntegrator.hpp"
 #include "../Meshes/stencil.hpp"
 #include "../Meshes/subdomain.hpp"
+#include  <ctime>
 #include <omp.h>
 #include <vector>
 #include <iostream>
@@ -89,6 +90,7 @@ public:
     }
     EMFKACSolver(unsigned int MPIrank){
         N = 0;
+        long int time_world = static_cast<long int> (time(NULL));
         for(int i = 0; i < 30; i++) sums[i] = 0;
         #pragma omp parallel
         {
@@ -99,7 +101,8 @@ public:
                 exp_dist.resize(omp_get_num_threads());
             }
             int id = omp_get_thread_num();
-            RNG[id].discard(MPIrank*1E+12 + id*1E+10);
+
+            RNG[id].discard((long int)(MPIrank*1E+12 + (id+time_world%33223)*1E+10));
         }
     };
     void Simulate_OMP(Eigen::Vector2d X0, unsigned int N_tray, double time_discretization,

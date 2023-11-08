@@ -31,7 +31,9 @@ void Stencil::Init(std::map<direction, std::vector<int> > s_index,
         }
         std::vector<int>::iterator v_north = std::unique(index_north.begin(), index_north.end());
         index_north.erase(v_north, index_north.end());
-        for(unsigned int i = 0; i < index_north.size(); i++) pos_north.push_back(sten_map[index_north[i]]);
+        for(unsigned int i = 0; i < index_north.size(); i++){
+            pos_north.push_back(sten_map[index_north[i]]);
+        }
         for(unsigned int i = 0; i < pos_north.size(); i++) G_north.push_back(0.0);
     }
     sten_map.clear();
@@ -117,7 +119,7 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
     //Psi Matrix, its inverse and Identity are created 
     Eigen::MatrixXd Psi, iPsi, I;
     //Condition number
-    double cond;
+    double cond,err;
     //RNG
     std::srand( (unsigned)time( NULL ) );
     //Matrix are resized
@@ -126,7 +128,7 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
     for(unsigned int i = 0; i < sten_position.size(); i ++){
         for(unsigned int j = 0; j < sten_position.size(); j ++){
             Psi(i,j) = boundvalprob.RBF(sten_position[i], sten_position[j], c2);
-            if(isnan(Psi(i,j))) printf("THERE IS A NAN IN PSI\n");
+            if(isnan(Psi(i,j))) printf("THERE IS A NAN IN PSI,%f\n",c2);
         }
     }
     //std::cout << Psi;
@@ -140,13 +142,8 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
         iPsi = Psi*0.0;
     }*/
     //do{
-        for(unsigned int i = 0; i < sten_position.size(); i ++){
-            for(unsigned int j = 0; j < sten_position.size(); j ++){
-                Psi(i,j) = boundvalprob.RBF(sten_position[i], sten_position[j], c2);
-                if(isnan(Psi(i,j))) printf("THERE IS A NAN IN PSI\n");
-                }                   
-            }
-            Eigen::FullPivLU<Eigen::MatrixXd> lu(Psi);
+                
+                Eigen::FullPivLU<Eigen::MatrixXd> lu(Psi);
                 if(lu.isInvertible()){
                     iPsi = lu.inverse();
                     //cond = Psi.norm()*iPsi.norm();
@@ -157,8 +154,8 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
                         }else{
                             c2 = sqrt(c2)-0.001;
                         }
-                    }*/
-                    //std::cout << "COND " << cond << " c2 " << c2 << std::endl;
+                    }
+                    //std::cout << "COND " << cond << " c2 " << c2 << std::endl;*/
                 }else{
                     printf("FATAL ERROR: Psi Matrix is not invertible.\n");
                     //iPsi = Psi*0.0;
@@ -171,13 +168,16 @@ Eigen::MatrixXd Stencil::Compute_ipsi(std::vector<Eigen::Vector2d> & sten_positi
     CGS.compute(Psi);
     iPsi = CGS.solveWithGuess(I,iPsi);
     err = CGS.error();*/
-    //cond = Psi.norm()*iPsi.norm();
+    cond = Psi.norm()*iPsi.norm();
     I.resize(sten_position.size(), sten_position.size());
     I.setIdentity();
-    //err = (Psi*iPsi-I).norm();
+    err = (Psi*iPsi-I).norm();
     //fdebug = fopen(debug_fname, "a");
     //fprintf(fdebug,"iPsi computed with cond number %f and error %f \n", cond, err);
-    //printf("iPsi computed with cond number %f and error %f \n", cond, err);
+    FILE* pf;
+    pf = fopen("Output/Debug/cond.txt","a");
+    fprintf(pf,"%f,%lu\n", cond,sten_position.size());
+    fclose(pf);
     //fclose(fdebug);
     Psi.resize(0,0);
     return iPsi;
@@ -208,7 +208,39 @@ void Stencil::Compute_ipsi(bvp boundvalprob, double c2, char debug_fname[256]){
 	}
         //std::cout << "HERE I AM \n";
 }
+void Stencil::Compute_ipsi(bvp boundvalprob, double c2[4], char debug_fname[256]){
+    FILE* pf;
+    if(pos_north.size() > 0){
+        c2_north = c2[kind_north];
+        pf = fopen("Output/Debug/cond.txt","a");
+        fprintf(pf,"north,%d,", kind_north);
+        fclose(pf);
+		ipsi_north = Compute_ipsi(pos_north, boundvalprob, c2_north, debug_fname);
 
+	}
+	if(pos_south.size() > 0){
+        c2_south = c2[kind_south];
+        pf = fopen("Output/Debug/cond.txt","a");
+        fprintf(pf,"south,%d,", kind_south);
+        fclose(pf);
+		ipsi_south = Compute_ipsi(pos_south, boundvalprob, c2_south, debug_fname);
+	}
+	if(pos_east.size() > 0){
+        c2_east = c2[kind_east];
+        pf = fopen("Output/Debug/cond.txt","a");
+        fprintf(pf,"east,%d,", kind_east);
+        fclose(pf);
+		ipsi_east = Compute_ipsi(pos_east, boundvalprob, c2_east, debug_fname);
+	}
+	if(pos_west.size() > 0){
+        c2_west = c2[kind_west];
+        pf = fopen("Output/Debug/cond.txt","a");
+        fprintf(pf,"west,%d,", kind_west);
+        fclose(pf);
+		ipsi_west = Compute_ipsi(pos_west, boundvalprob, c2_west, debug_fname);
+	}
+        //std::cout << "HERE I AM \n";
+}
 int Stencil::G_update(Eigen::Vector2d X, double Y, bvp boundvalprob, double c2){
 	double H_ij;
 	if(AreSame(X(1),stencil_parameters[1])){

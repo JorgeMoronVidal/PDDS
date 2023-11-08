@@ -29,8 +29,8 @@ class Stencil
         //Computes the inverse matrix of the psi matrix
         double c2_north, c2_south, c2_east, c2_west;
         Eigen::MatrixXd Compute_ipsi(std::vector<Eigen::Vector2d> & sten_position, bvp boundvalprob, double & c2, char debug_fname[256]);
-       
     public:
+        int kind_north,kind_south,kind_east,kind_west;
         //Parameters of the stencil boundary
         double stencil_parameters[4];
         //Parameters of the boundary of the problem
@@ -65,6 +65,7 @@ class Stencil
         double c2 The constan for the mesheless interpolator
         */
         void Compute_ipsi(bvp boundvalprob, double c2, char debug_fname[256]);
+        void Compute_ipsi(bvp boundvalprob, double c2[4], char debug_fname[256]);
         /* Updates G matrix 
         Eigen::Vector2d X position where the trayectory ended
         double Y Y FKAC value where the trayectoy ended

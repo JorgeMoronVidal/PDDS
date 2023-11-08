@@ -76,7 +76,10 @@ PDDSparseGM::PDDSparseGM(int argc, char *argv[]){
   SW.resize(2);
   NE.resize(2);
   N = 0;
-  fac = 1;
+  fac[0] = 1.0;
+  fac[1] = 1.0;
+  fac[2] = 1.0;
+  fac[3] = 1.0;
   MPI_Configuration(argc, argv);
 }
 PDDSparseGM::PDDSparseGM(int argc, char *argv[],std::string file){ 
@@ -152,22 +155,22 @@ void PDDSparseGM::ReadFromFile(std::string file){
                             break;
                         }
                         if(cent == "fac="){
-                            while( *it == ' ' or *it == '\t'){
+                            for(int i = 0; i < 4; i++){
+                                while( *it == ' ' or *it == '\t'){
+                                    it++;
 
-                                        it++;
+                                }
 
+                                cent.clear();
+
+                                while((*it != ' ') && (*it != '\t') && (it != line.end())){
+
+                                    cent += *it;
+                                    it++;
+
+                                }
+                                fac[i] = atof(cent.c_str());
                             }
-
-                            cent.clear();
-
-                            while( it != line.end()){
-
-                                cent += *it;
-                                it++;
-
-                            }
-                            
-                            fac = atof(cent.c_str());
                             break;
                         }
                         if(cent == "T="){
@@ -345,11 +348,16 @@ void PDDSparseGM::Fullfill_interfaces(void){
    std::vector<Eigen::Vector2d> P_cent, lincrement, sincrement, start, end;
    Eigen::Vector2d vaux;
    std::vector<std::vector<int>> node_index;
+   #ifdef HAIRY 
+   interfaces.resize((iN[0]+2)*(iN[1]-1)+ (iN[1]+2)*( iN[0]-1));
+   subdomains.resize((iN[0]+2)*(iN[1]-1)+ (iN[1]+2)*( iN[0]-1));
+   node_index.resize((iN[0]+2)*(iN[1]-1)+ (iN[1]+2)*( iN[0]-1));
+   #else 
    interfaces.resize(iN[0]*(iN[1]-1)+ iN[1]*( iN[0]-1));
    subdomains.resize(iN[0]*(iN[1]-1)+ iN[1]*( iN[0]-1));
    node_index.resize(iN[0]*(iN[1]-1)+ iN[1]*( iN[0]-1));
    vaux.resize(SW.size());
-
+   #endif
    //Increments are defined
    //ShortIncrement
    for (int i = 0; i < SW.size() ; i++){
@@ -390,7 +398,7 @@ void PDDSparseGM::Fullfill_interfaces(void){
             P_cent.push_back(vaux);
     }
     //c2 is computed as the square of fac*internodal space.
-    c2 = pow(fac*sincrement[0].norm(),2.0);
+    //c2 = pow(fac*sincrement[0].norm(),2.0);
     //This section is not valid for + 2D problems
 
     P_cent[0] += lincrement[1];
@@ -400,7 +408,7 @@ void PDDSparseGM::Fullfill_interfaces(void){
 
     for (int i = 0; i < iN[1] - 1; i++){
 
-        for (int j = 0; j < iN[0]; j++){
+        for (int j = 0; j < iN[0] ; j++){
 
             start.push_back(P_cent[0] + lincrement[0]*j);
             end.push_back(P_cent[0] + lincrement[0]*(j+1));
@@ -427,7 +435,58 @@ void PDDSparseGM::Fullfill_interfaces(void){
         P_cent[1] += lincrement[0];
 
     }
+    #ifdef HAIRY
+    //std::cout << cen << std::endl;
+    Eigen::Vector2d NW, SE;
+    NW[0] = SW[0]; NW[1] = NE[1];
+    SE[0] = NE[0]; SE[1] = SW[1];
+    P_cent[0] = SW - lincrement[1] + lincrement[0];
+    for (int i = 0; i < iN[0]-1; i++){
+        start.push_back(P_cent[0] + lincrement[0]*i);
+        end.push_back(P_cent[0] + lincrement[0]*i +lincrement[1]);
 
+        interfaces[cen].label.push_back(i);
+        interfaces[cen].label.push_back(-2);
+        subdomains[cen].label.push_back(i);
+        subdomains[cen].label.push_back(-2);
+
+        cen++;
+    }
+    P_cent[0] = SW + lincrement[1] - lincrement[0];
+    P_cent[1] = SE + lincrement[1];
+    for (int i = 0; i < iN[1]-1; i++){
+        start.push_back(P_cent[0] + lincrement[1]*i);
+        end.push_back(P_cent[0] + lincrement[1]*i + lincrement[0]);
+
+        interfaces[cen].label.push_back(-1);
+        interfaces[cen].label.push_back(2*i +1);
+        subdomains[cen].label.push_back(-1);
+        subdomains[cen].label.push_back(2*i +1);
+
+        cen++;
+
+        start.push_back(P_cent[1] + lincrement[1]*i);
+        end.push_back(P_cent[1] + lincrement[1]*i + lincrement[0]);
+
+        interfaces[cen].label.push_back(iN[0]);
+        interfaces[cen].label.push_back(2*i +1);
+        subdomains[cen].label.push_back(iN[0]);
+        subdomains[cen].label.push_back(2*i +1);
+        cen ++;
+        //std::cout << cen << "\t" << interfaces.size() << std::endl;
+    }
+    P_cent[0] = NW + lincrement[0];
+    for (int i = 0; i < iN[0]-1; i++){
+        start.push_back(P_cent[0] + lincrement[0]*i);
+        end.push_back(P_cent[0] + lincrement[0]*i +lincrement[1]);
+        interfaces[cen].label.push_back(i);
+        interfaces[cen].label.push_back(2*iN[1]);
+        subdomains[cen].label.push_back(i);
+        subdomains[cen].label.push_back(2*iN[1]);
+
+        cen++;
+    }
+    #endif
     for(int i = 0; i < (int)interfaces.size(); i++){
         interface_map[interfaces[i].label] = i;
     }
@@ -482,6 +541,59 @@ void PDDSparseGM::Fullfill_interfaces(void){
             }
         }
     }
+    #ifdef HAIRY
+    std::vector<int> stvaux_2;
+    for(int i = 0; i < iN[0] - 1; i++){
+        stvaux.clear();
+        stvaux.push_back(i);
+        stvaux.push_back(-2);
+        stvaux_2.clear();
+        stvaux_2.push_back(i);
+        stvaux_2.push_back(0);
+        index = interface_map[stvaux];
+        for(int k = 0; k < nN[1]-1; k ++){
+            node_index[index].push_back(cent);
+            cent ++;
+        }
+        node_index[index].push_back(node_index[interface_map[stvaux_2]][0]);
+    }
+    for(int i = 1; i <= 2*iN[1]-3; i +=2){
+        stvaux.clear();
+        stvaux.push_back(-1);
+        stvaux.push_back(i);
+        stvaux_2.clear();
+        stvaux_2.push_back(0);
+        stvaux_2.push_back(i);
+        index = interface_map[stvaux];
+        for(int k = 0; k < nN[0]-1; k ++){
+            node_index[index].push_back(cent);
+            cent ++;
+        }
+        node_index[index].push_back(node_index[interface_map[stvaux_2]][0]);
+        stvaux[0] = iN[0];
+        stvaux_2[0] = iN[0]-1;
+        index = interface_map[stvaux];
+        node_index[index].push_back(node_index[interface_map[stvaux_2]][nN[0]-1]);
+        for(int k = 0; k < nN[0]-1; k ++){
+            node_index[index].push_back(cent);
+            cent ++;
+        }
+    }
+    for(int i = 0; i < iN[0] - 1; i++){
+        stvaux.clear();
+        stvaux.push_back(i);
+        stvaux.push_back(2*iN[1]);
+        stvaux_2.clear();
+        stvaux_2.push_back(i);
+        stvaux_2.push_back(2*iN[1]-2);
+        index = interface_map[stvaux];
+        node_index[index].push_back(node_index[interface_map[stvaux_2]][nN[1]-1]);
+        for(int k = 0; k < nN[1]-1; k ++){
+            node_index[index].push_back(cent);
+            cent ++;
+        }  
+    }
+    #endif
     #else 
     //stvaux stores the current interface index.
     std::vector<int> stvaux;
@@ -641,13 +753,36 @@ void PDDSparseGM::Solve(bvp BoundValProb){
                 
             }
         }
-        Update_TimeFile("MC Simulations",server+1);
         //G and B are received from the workers
         #ifdef LOCAL_SERVERS
         #else
         for(int process = 0; process < server; process++){
              Receive_G_B();
         }
+        #ifdef HAIRY
+        double aux_g = 0;
+        for(int Ix = 0; Ix <= iN[0]-2; Ix ++){
+            aux_vec[0] = Ix;
+            aux_vec[1] = -2;
+            aux_g = BoundValProb.g(interfaces[interface_map[aux_vec]].position[nN[1]-1],0);
+            for(int i = 0; i < nN[1]-1; i++) T_vec_B.push_back(T(interfaces[interface_map[aux_vec]].index[i], 0, aux_g));
+            aux_vec[0] = Ix;
+            aux_vec[1] = 2*iN[1];
+            aux_g = BoundValProb.g(interfaces[interface_map[aux_vec]].position[0],0);
+            for(int i = 1; i < nN[1]; i++) T_vec_B.push_back(T(interfaces[interface_map[aux_vec]].index[i], 0, aux_g));
+        }
+        for(int Iy = 1; Iy <= 2*iN[1]-3; Iy = Iy +2){
+            aux_vec[0] = -1;
+            aux_vec[1] = Iy;
+            aux_g = BoundValProb.g(interfaces[interface_map[aux_vec]].position[nN[1]-1],0);
+            for(int i = 0; i < nN[1]-1; i++) T_vec_B.push_back(T(interfaces[interface_map[aux_vec]].index[i], 0, aux_g));
+            aux_vec[0] = iN[0];
+            aux_vec[1] = Iy;
+            aux_g = BoundValProb.g(interfaces[interface_map[aux_vec]].position[0],0);
+            for(int i = 1; i < nN[1]; i++) T_vec_B.push_back(T(interfaces[interface_map[aux_vec]].index[i], 0, aux_g));
+        }
+        #endif
+        Update_TimeFile("MC Simulations",server+1);
         Update_TimeFile("Receiving G and B",server+1);
         B.clear();
         B_i.clear();
@@ -667,8 +802,9 @@ void PDDSparseGM::Solve(bvp BoundValProb){
         Eigen::Vector2d X0;
         //Stencil
         Stencil stencil;
-        EMFKACSolver solver;
-        c2 = pow(3.6*32.0/nN[0],2.0);
+        EMFKACSolver solver(myid);
+        //c2 = pow(3.6*32.0/nN[0],2.0);
+        c2 = fac[0];
         G_i.clear();G_j.clear(); G.clear(); G_CT.clear(); G_var_temp.clear(); 
         B.clear();B_CT.clear();B_i.clear();B_var.clear(); G_var.clear();
         while(! Receive_Interface(x,y,indexes)){
@@ -677,7 +813,7 @@ void PDDSparseGM::Solve(bvp BoundValProb){
             for(unsigned int knot = 0; knot < x.size(); knot ++){
                 //knot_start = MPI_Wtime();
                 stencil = Compute_Stencil(indexes[knot]);
-                stencil.Compute_ipsi(BoundValProb,c2,debug_fname);
+                stencil.Compute_ipsi(BoundValProb,fac,debug_fname);
                 for(int i = 0; i < 4; i++) stencil.global_parameters[i] = parameters[i];
                 //std::cout << "Solving knot " << indexes[knot] << std::endl;
                 B_temp = 0.0;
@@ -949,7 +1085,7 @@ void PDDSparseGM::Solve_SemiLin(int iteration, bvp BoundValProb){
         //spline
         gsl_spline2d *LUT_u, *LUT_v;
         gsl_interp_accel *xacc_u, *yacc_u, *xacc_v, *yacc_v;
-        c2 = pow(fac*(1.0/(nN[0]-1)),2.0);
+        c2 = pow(fac[0]*(1.0/(nN[0]-1)),2.0);
         G_i.clear();G_j.clear(); G.clear(); G_CT.clear(); G_var_temp.clear(); 
         B.clear();B_CT.clear();B_i.clear();B_var.clear(); G_var.clear();
         while(! Receive_Interface(x,y,indexes)){
@@ -1292,7 +1428,7 @@ std::map<direction, std::vector<std::vector <int> > > PDDSparseGM::Labels_Stenci
     printf("\n");
     printf("West: ");
     for(int i = 0; i < (int) output[West].size(); i++) printf("[%d %d] ",output[West][i][0],output[West][i][1]);
-    printf("\n"); */
+    printf("\n");*/
     return output;
 }
 std::map<direction, std::vector<std::vector <int> > > PDDSparseGM::Labels_Stencil_Square(int index){
@@ -1743,6 +1879,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
     FILE *dfile;
     s_dir.resize(4);
     s_dir[0] = North; s_dir[1] = South; s_dir[2] = East; s_dir[3] = West;
+     int kind_north = -3, kind_south = -3, kind_east = -3, kind_west = -3;
     for(std::vector<direction>::iterator it = s_dir.begin(); it != s_dir.end(); it++){
     if(labels[*it].size() > 0){
         s_inter = interfaces[interface_map[labels[*it][0]]];
@@ -1752,6 +1889,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
             case North:
                 aux_label[0] --;
                 if(interface_map.count(aux_label)>0){
+                kind_north ++;
                 aux_inter = interfaces[interface_map[aux_label]];
                 for(int i = (int)((1-STEN_ELONG)*(aux_inter.index.size()-1));
                     i < (int) aux_inter.index.size(); i ++){
@@ -1764,6 +1902,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
             case South:
                 aux_label[0] --;
                 if(interface_map.count(aux_label)>0){
+                    kind_south ++;
                 aux_inter = interfaces[interface_map[aux_label]];
                 for(int i = (int)((1-STEN_ELONG)*(aux_inter.index.size()-1));
                     i < (int) aux_inter.index.size(); i ++){
@@ -1776,6 +1915,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
             case East:
                 aux_label[1] += -2;
                 if(interface_map.count(aux_label)>0){
+                kind_east ++;
                 aux_inter = interfaces[interface_map[aux_label]];
                 for(int i = (int)((1-STEN_ELONG)*(aux_inter.index.size()-1));
                     i < (int) aux_inter.index.size(); i ++){
@@ -1788,6 +1928,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
             case West:
                 aux_label[1] += -2;
                 if(interface_map.count(aux_label)>0){
+                kind_west ++;
                 aux_inter = interfaces[interface_map[aux_label]];
                 for(int i = (int)((1-STEN_ELONG)*(aux_inter.index.size()-1));
                     i < (int) aux_inter.index.size(); i ++){
@@ -1810,6 +1951,22 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
                 s_x[*it].push_back(s_inter.position[j][0]);
                 s_y[*it].push_back(s_inter.position[j][1]);
             }
+            switch(*it){
+                case North:
+                    kind_north +=2;
+                    break;
+                case South:
+                    kind_south +=2;
+                    break;
+                case West:
+                    kind_west +=2;
+                    break;
+                case East:
+                    kind_east +=2;
+                    break;
+                default:
+                    printf("%s %d\n",__FILE__,__LINE__);
+            }
         }
         aux_label.resize(2);
         aux_label[0] = s_inter.label[0]; aux_label[1] = s_inter.label[1];
@@ -1817,6 +1974,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
             case North:
                 aux_label[0] ++;
                 if(interface_map.count(aux_label)>0){
+                kind_north ++;
                 aux_inter = interfaces[interface_map[aux_label]];
                 for(int i = 0;
                     i < (int) ((STEN_ELONG)*(aux_inter.index.size())); i ++){
@@ -1829,6 +1987,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
             case South:
                 aux_label[0] ++;
                 if(interface_map.count(aux_label)>0){
+                kind_south ++;
                 aux_inter = interfaces[interface_map[aux_label]];
                 for(int i = 0;
                     i < (int) ((STEN_ELONG)*(aux_inter.index.size())); i ++){
@@ -1841,6 +2000,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
             case East:
                 aux_label[1] += 2;
                 if(interface_map.count(aux_label)>0){
+                kind_east ++;
                 aux_inter = interfaces[interface_map[aux_label]];
                 for(int i = 0;
                     i < (int) ((STEN_ELONG)*(aux_inter.index.size())); i ++){
@@ -1854,6 +2014,7 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
                 aux_label[1] += 2;
                 if(interface_map.count(aux_label)>0){
                 aux_inter = interfaces[interface_map[aux_label]];
+                if(aux_inter.index.size() > 0) kind_west ++;
                 for(int i = 0;
                     i < (int) ((STEN_ELONG)*(aux_inter.index.size())); i ++){
                         s_index[*it].push_back(aux_inter.index[i]);
@@ -1869,9 +2030,13 @@ Stencil PDDSparseGM::Compute_Stencil(int index){
         }
     }
     }
+
     Stencil output;
     output.Init(s_index,s_x,s_y,s_params);
-
+    output.kind_north = kind_north;
+    output.kind_south = kind_south;
+    output.kind_east = kind_east;
+    output.kind_west = kind_west;
     return output;
 }
 Stencil PDDSparseGM::Recieve_Stencil_Data(void){
@@ -3803,7 +3968,7 @@ void PDDSparseGM::Solve_SemiLin_numVR(int iteration, bvp Lin_BVP){
         //spline
         gsl_spline2d *LUT_u, *LUT_v;
         gsl_interp_accel *xacc_u, *yacc_u, *xacc_v, *yacc_v;
-        c2 = pow(fac*(1.0/(nN[0]-1)),2.0);
+        c2 = pow(fac[0]*(1.0/(nN[0]-1)),2.0);
         G_i.clear();G_j.clear(); G.clear(); G_CT.clear(); G_var.clear();
         B.clear();B_CT.clear();B_i.clear();B_var.clear(); times.clear();
         G.clear(); G_CT.clear(); B.clear(); B_CT.clear(); G_var.clear(); B_var.clear();
@@ -4051,7 +4216,7 @@ void PDDSparseGM::Solve_Iterative_numVR(int iteration, bvp Lin_BVP){
         //spline. The v's are u0s 
         gsl_spline2d *LUT_u, *LUT_v;
         gsl_interp_accel *xacc_u, *yacc_u, *xacc_v, *yacc_v;
-        c2 = pow(fac*(1.0/(nN[0]-1)),2.0);
+        c2 = pow(fac[0]*(1.0/(nN[0]-1)),2.0);
         G_i.clear();G_j.clear(); G.clear(); G_CT.clear(); G_var.clear();
         B.clear();B_CT.clear();B_i.clear();B_var.clear(); times.clear();
         G.clear(); G_CT.clear(); B.clear(); B_CT.clear(); G_var.clear(); B_var.clear();

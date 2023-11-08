@@ -16,6 +16,7 @@ int main(int argc, char *argv[]){
     boundvalprob.c = Equation_c;
     std::string config("configuration.txt");
     PDDSparseGM PDDS(argc,argv,config);
+    //PDDS.Print_Interface();
     PDDS.Solve(boundvalprob);
     MPI_Finalize();
 }

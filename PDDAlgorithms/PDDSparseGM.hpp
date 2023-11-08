@@ -2,7 +2,7 @@
 #ifndef PDDSPARSEGM
 #define PDDSPARSEGM
 //Fraction of the interface the stencil is elongated
-#define STEN_ELONG 0.0
+#define STEN_ELONG 0.5
 //Minimum value of N
 #define N_min 500
 //Minimum value of h
@@ -68,6 +68,7 @@
 #define TAG_INTERFACE_INDEX 162
 //Interfaces
 #define INTERSECTIONS_YES
+//#define HAIRY
 //Stencil 
 //#define SQUARE_PATCHES
 //MPI Implementation
@@ -133,7 +134,7 @@ class PDDSparseGM{
           -factor that multiplies the internodal distance
           -constant of the RBF interpolator 
           */
-        double h0, T_start, eps, fac, c2,wclock_start,wclock_measure,wclock_prev;
+        double h0, T_start, eps, c2,wclock_start,wclock_measure,wclock_prev;
         std::vector<double> parameters;
         /*-SW is the south west point of the domain.
           -NE is the north east point of the domain.
@@ -229,6 +230,7 @@ class PDDSparseGM{
        /*Reading subdomain files routines*/
        std::vector<double> Read_File(char fname[256]);
     public:
+       double fac[4];
        /*Reads the problem information from a file.*/
        void ReadFromFile(std::string file);
        /*Interface and node structure intialization*/

@@ -2,11 +2,11 @@
 ***************Ver 1.0******************
 ***********Jorge Moron Vidal************
 **********jmoron@math.uc3m.es***********
-h0 = 1.000000e-03 	 T_start = inf
-Number of trayectories per knot 1000
-Number of trayectories per job 32529
-Number of subdomains/interfaces: 3 x 3 
-Number of knots per interface: 64
-Total number of knots: 756
-Position of South-West corner of the domain: (-25.00,-25.00)
-Position of North-East corner of the domain: (25.00,25.00)
+h0 = 5.000000e-03 	 T_start = inf
+Number of trayectories per knot 5000
+Number of trayectories per job 32767
+Number of subdomains/interfaces: 4 x 4 
+Number of knots per interface: 8
+Total number of knots: 165
+Position of South-West corner of the domain: (-5.00,-5.00)
+Position of North-East corner of the domain: (5.00,5.00)
